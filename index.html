@@ -125,6 +125,8 @@
   .preview-meta{ font-size:13px; color:var(--text-secondary); margin-bottom:10px; font-family:var(--font-mono); }
   .preview-desc{ font-size:14px; color:var(--text-secondary); margin-bottom:16px; }
   .rest-card .preview-desc{ margin-bottom:16px; }
+  .rest-alt-label{ font-size:12px; font-weight:600; color:var(--text-secondary); text-transform:uppercase; letter-spacing:.04em; margin-bottom:10px; }
+  .rest-alt-buttons{ display:flex; flex-direction:column; gap:10px; }
   .done-today-card{ border-color:rgba(34,197,94,.4); background:var(--success-tint); }
   .done-today-title{ font-family:var(--font-display); text-transform:uppercase; font-size:13px; letter-spacing:.05em; color:var(--success); margin-bottom:4px; }
   .done-today-line{ font-size:13px; color:var(--text); font-family:var(--font-mono); }
@@ -713,8 +715,12 @@ function renderRestDayCard(schedule){
   return '<div class="card rest-card">' +
     '<h2 class="preview-title">Dia de descanso</h2>' +
     '<p class="preview-desc">Hoje é dia de recuperação. Seu corpo constrói força enquanto descansa — aproveite para se alongar, hidratar bem e dormir cedo.</p>' +
-    (schedule.expressOpcional ? '<button class="btn btn-secondary btn-block" type="button" onclick="startSession(\'express\')">Fazer Treino Express mesmo assim</button>' : '') +
-    '</div>';
+    '<p class="rest-alt-label">Quer treinar mesmo assim?</p>' +
+    '<div class="rest-alt-buttons">' +
+    '<button class="btn btn-secondary btn-block" type="button" onclick="startSession(\'forca\')">Força</button>' +
+    '<button class="btn btn-secondary btn-block" type="button" onclick="startSession(\'hiit\')">HIIT + Abdômen</button>' +
+    '<button class="btn btn-primary btn-block" type="button" onclick="startSession(\'express\')">Treino Express</button>' +
+    '</div></div>';
 }
 
 function renderActiveSession(session, nivel){
