@@ -129,6 +129,7 @@
   .rest-alt-buttons{ display:flex; flex-direction:column; gap:10px; }
   .rpe-warning-card{ border-color:rgba(255,59,48,.4); background:var(--accent-tint); }
   .rpe-warning-title{ font-family:var(--font-display); text-transform:uppercase; font-size:13px; letter-spacing:.03em; color:var(--accent); margin-bottom:4px; }
+  .ensaio-note{ font-size:13px; font-weight:600; color:var(--accent); padding:10px 14px; border:1px solid rgba(255,59,48,.35); background:var(--accent-tint); margin-bottom:14px; }
   .done-today-card{ border-color:rgba(34,197,94,.4); background:var(--success-tint); }
   .done-today-title{ font-family:var(--font-display); text-transform:uppercase; font-size:13px; letter-spacing:.05em; color:var(--success); margin-bottom:4px; }
   .done-today-line{ font-size:13px; color:var(--text); font-family:var(--font-mono); }
@@ -501,7 +502,7 @@ var CRONOGRAMA = [
   { dow: 1, nome: 'Segunda', workoutId: 'forca', expressOpcional: false },
   { dow: 2, nome: 'Terça', workoutId: 'hiit', expressOpcional: false },
   { dow: 3, nome: 'Quarta', workoutId: null, expressOpcional: true },
-  { dow: 4, nome: 'Quinta', workoutId: 'forca', expressOpcional: false },
+  { dow: 4, nome: 'Quinta', workoutId: 'forca', expressOpcional: false, ensaio: true },
   { dow: 5, nome: 'Sexta', workoutId: 'hiit', expressOpcional: false },
   { dow: 6, nome: 'Sábado', workoutId: 'forca', expressOpcional: false }
 ];
@@ -681,6 +682,10 @@ function renderHoje(){
       sessionsToday.map(function(s){
         return '<p class="done-today-line">' + workoutLabel(s.tipo) + ' · ' + fmtDuration(s.duracaoSegundos) + ' · RPE ' + s.rpe + '</p>';
       }).join('') + '</div>';
+  }
+
+  if(schedule.ensaio){
+    html += '<p class="ensaio-note">Hoje também é dia de ensaio da fanfarra.</p>';
   }
 
   if(!state.activeSession){
