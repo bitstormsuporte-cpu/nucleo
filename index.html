@@ -127,6 +127,8 @@
   .rest-card .preview-desc{ margin-bottom:16px; }
   .rest-alt-label{ font-size:12px; font-weight:600; color:var(--text-secondary); text-transform:uppercase; letter-spacing:.04em; margin-bottom:10px; }
   .rest-alt-buttons{ display:flex; flex-direction:column; gap:10px; }
+  .rpe-warning-card{ border-color:rgba(255,59,48,.4); background:var(--accent-tint); }
+  .rpe-warning-title{ font-family:var(--font-display); text-transform:uppercase; font-size:13px; letter-spacing:.03em; color:var(--accent); margin-bottom:4px; }
   .done-today-card{ border-color:rgba(34,197,94,.4); background:var(--success-tint); }
   .done-today-title{ font-family:var(--font-display); text-transform:uppercase; font-size:13px; letter-spacing:.05em; color:var(--success); margin-bottom:4px; }
   .done-today-line{ font-size:13px; color:var(--text); font-family:var(--font-mono); }
@@ -208,6 +210,8 @@
 
   /* Chart */
   .chart-svg{ width:100%; height:170px; display:block; }
+  .rpe-trend-summary{ font-size:13px; margin-top:10px; text-align:center; }
+  .rpe-trend-summary strong{ font-family:var(--font-mono); color:var(--text); }
 
   /* Table */
   .table-wrap{ overflow-x:auto; -webkit-overflow-scrolling:touch; }
@@ -679,6 +683,11 @@ function renderHoje(){
       }).join('') + '</div>';
   }
 
+  if(!state.activeSession){
+    var rpeWarning = getRecentHighRpeWarning();
+    if(rpeWarning) html += renderRpeWarningCard();
+  }
+
   if(state.activeSession){
     html += renderActiveSession(state.activeSession, nivel);
   } else if(schedule.workoutId){
@@ -699,6 +708,27 @@ function renderHoje(){
   } else {
     clearSessionTimer();
   }
+}
+
+function getRecentHighRpeWarning(){
+  var sessions = getSessions().slice().sort(function(a, b){ return b.timestampInicio.localeCompare(a.timestampInicio); });
+  var recent = sessions.slice(0, 3);
+  if(recent.length < 2) return null;
+  var highCount = recent.filter(function(s){ return s.rpe >= 4; }).length;
+  return highCount >= 2 ? { highCount: highCount, total: recent.length } : null;
+}
+
+function renderRpeWarningCard(){
+  var nivel = state.nivel;
+  var nextLower = nivel === 'avancado' ? 'intermediario' : (nivel === 'intermediario' ? 'iniciante' : null);
+  var actionBtn = nextLower
+    ? '<button type="button" class="btn btn-secondary btn-block" onclick="setNivel(\'' + nextLower + '\')">Baixar para ' + levelLabel(nextLower) + '</button>'
+    : '<p class="empty-hint">Você já está no nível Iniciante — considere fazer menos séries hoje ou descansar mais um dia.</p>';
+  return '<div class="card rpe-warning-card">' +
+    '<p class="rpe-warning-title">Esforço alto nos últimos treinos</p>' +
+    '<p class="preview-desc">Seus últimos treinos vieram com esforço percebido alto (RPE 4 ou 5). Isso pode ser sinal de fadiga acumulada — considere reduzir o nível, fazer menos séries hoje, ou descansar um dia a mais.</p>' +
+    actionBtn +
+    '</div>';
 }
 
 function renderWorkoutPreviewCard(w, schedule){
@@ -1307,6 +1337,7 @@ function renderProgresso(){
     '</div><button type="submit" class="btn btn-primary btn-block">Salvar medida</button></form></div>';
 
   html += '<div class="card"><h3 class="section-title">Evolução do peso</h3>' + renderWeightChart(measurements) + '</div>';
+  html += '<div class="card"><h3 class="section-title">Resistência (esforço percebido)</h3>' + renderEnduranceChart() + '</div>';
   html += '<div class="card"><h3 class="section-title">Histórico de medidas</h3>' + renderMeasurementsTable(measurements) + '</div>';
   html += '<div class="card"><h3 class="section-title">Últimas 4 semanas</h3>' + renderCalendar() + '</div>';
   html += '<div class="card"><h3 class="section-title">Recordes pessoais</h3>' + renderPRCards() + '</div>';
@@ -1413,6 +1444,54 @@ function deleteMeasurement(id){
   if(!confirm('Excluir esta medida?')) return;
   setMeasurements(getMeasurements().filter(function(m){ return m.id !== id; }));
   renderProgresso();
+}
+
+function renderEnduranceChart(){
+  var sessions = getSessions().slice().sort(function(a, b){ return a.timestampInicio.localeCompare(b.timestampInicio); });
+  if(sessions.length < 2) return '<p class="empty-hint">Complete pelo menos 2 treinos (com o RPE preenchido) para ver o gráfico de resistência.</p>';
+
+  var W = 320, H = 170, padL = 24, padR = 12, padT = 18, padB = 24;
+  var xStep = (W - padL - padR) / (sessions.length - 1);
+  var xy = sessions.map(function(s, i){
+    var x = padL + i * xStep;
+    var y = padT + (H - padT - padB) * (1 - (s.rpe - 1) / 4);
+    return [x, y];
+  });
+  var pathD = xy.map(function(c, i){ return (i === 0 ? 'M' : 'L') + c[0].toFixed(1) + ',' + c[1].toFixed(1); }).join(' ');
+  var dots = xy.map(function(c, i){
+    return '<circle cx="' + c[0].toFixed(1) + '" cy="' + c[1].toFixed(1) + '" r="3.5" fill="#FF3B30"><title>' + fmtDateDisplay(sessions[i].data) + ': RPE ' + sessions[i].rpe + '</title></circle>';
+  }).join('');
+
+  var gridLines = '';
+  for(var r = 1; r <= 5; r++){
+    var gy = padT + (H - padT - padB) * (1 - (r - 1) / 4);
+    gridLines += '<line x1="' + padL + '" y1="' + gy.toFixed(1) + '" x2="' + (W - padR) + '" y2="' + gy.toFixed(1) + '" stroke="rgba(255,255,255,.08)" stroke-width="1"/>';
+    gridLines += '<text x="2" y="' + (gy + 3).toFixed(1) + '" font-size="8" fill="rgba(255,255,255,.5)" font-family="IBM Plex Mono">' + r + '</text>';
+  }
+
+  var svg = '<svg class="chart-svg" viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none" role="img" aria-label="Gráfico de esforço percebido (RPE) ao longo do tempo">' +
+    gridLines +
+    '<path d="' + pathD + '" fill="none" stroke="#FF3B30" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>' +
+    dots + '</svg>';
+
+  return svg + renderRpeTrendSummary(sessions);
+}
+
+function renderRpeTrendSummary(sessions){
+  var n = sessions.length;
+  var windowSize = Math.min(3, Math.max(1, Math.floor(n / 2)));
+  var recent = sessions.slice(n - windowSize);
+  var avg = function(arr){ return arr.reduce(function(a, s){ return a + s.rpe; }, 0) / arr.length; };
+  var recentAvg = avg(recent);
+  var trendHtml = '';
+  if(n - windowSize * 2 >= 0){
+    var previous = sessions.slice(n - windowSize * 2, n - windowSize);
+    var diff = recentAvg - avg(previous);
+    if(diff <= -0.4) trendHtml = '<span style="color:var(--success)">↓ caindo — sinal de que sua resistência está melhorando</span>';
+    else if(diff >= 0.4) trendHtml = '<span style="color:var(--accent)">↑ subindo — pode ser fadiga acumulada ou treinos mais difíceis</span>';
+    else trendHtml = '<span style="color:var(--text-secondary)">→ estável</span>';
+  }
+  return '<p class="rpe-trend-summary">RPE médio (últimos ' + recent.length + '): <strong>' + recentAvg.toFixed(1) + '</strong>' + (trendHtml ? ' — ' + trendHtml : '') + '</p>';
 }
 
 function renderWeightChart(measurements){
