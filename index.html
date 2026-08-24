@@ -122,6 +122,7 @@
 
   /* Today: preview / rest cards */
   .preview-title{ font-size:32px; line-height:1.02; margin-bottom:6px; }
+  .cycle-label{ font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.05em; color:var(--accent); margin-bottom:10px; font-family:var(--font-display); }
   .preview-meta{ font-size:13px; color:var(--text-secondary); margin-bottom:10px; font-family:var(--font-mono); }
   .preview-desc{ font-size:14px; color:var(--text-secondary); margin-bottom:16px; }
   .rest-card .preview-desc{ margin-bottom:16px; }
@@ -507,6 +508,41 @@ var CRONOGRAMA = [
   { dow: 6, nome: 'Sábado', workoutId: 'forca', expressOpcional: false }
 ];
 
+// Plano mensal: ciclo de 4 semanas com sobrecarga progressiva e deload na semana 4,
+// ajustando o número de voltas do treino do dia (a meta de reps/tempo por exercício
+// continua a mesma do nível escolhido — quem varia é o volume de séries).
+var CICLO_SEMANAS = {
+  1: { label: 'Adaptação', voltasAjuste: 0 },
+  2: { label: 'Construção', voltasAjuste: 0 },
+  3: { label: 'Pico', voltasAjuste: 1 },
+  4: { label: 'Deload · recuperação', voltasAjuste: -1 }
+};
+var CICLO_KEY = 'treino_cycle_start';
+
+function getCycleStart(){
+  var stored = localStorage.getItem(CICLO_KEY);
+  if(!stored){
+    stored = fmtDate(new Date());
+    localStorage.setItem(CICLO_KEY, stored);
+  }
+  return stored;
+}
+
+function getWeekInCycle(){
+  var start = new Date(getCycleStart() + 'T00:00:00');
+  var today = new Date(); today.setHours(0, 0, 0, 0);
+  var diffDays = Math.floor((today - start) / 86400000);
+  var weekIndex = Math.floor(Math.max(0, diffDays) / 7) % 4;
+  return weekIndex + 1;
+}
+
+function getVoltasForToday(w, nivel){
+  var base = w.voltasPorNivel[nivel];
+  if(w.formato !== 'circuito' && w.formato !== 'hiit') return base;
+  var ajuste = CICLO_SEMANAS[getWeekInCycle()].voltasAjuste;
+  return Math.max(2, base + ajuste);
+}
+
 var RPE_LABELS = { 1: 'Tranquilo', 2: 'Moderado', 3: 'Difícil', 4: 'Muito difícil', 5: 'No limite' };
 
 /* ============================================================
@@ -737,10 +773,15 @@ function renderRpeWarningCard(){
 }
 
 function renderWorkoutPreviewCard(w, schedule){
+  var nivel = state.nivel;
+  var week = getWeekInCycle();
+  var weekInfo = CICLO_SEMANAS[week];
+  var voltasHoje = getVoltasForToday(w, nivel);
   return '<div class="card">' +
     '<span class="pill pill-' + w.corBadge + '">' + w.badge + '</span>' +
     '<h2 class="preview-title">' + w.nome + '</h2>' +
-    '<p class="preview-meta">' + schedule.nome + ' · ' + w.duracaoText + ' · ' + w.voltasRangeText + '</p>' +
+    '<p class="preview-meta">' + schedule.nome + ' · ' + w.duracaoText + ' · ' + voltasHoje + ' voltas hoje</p>' +
+    '<p class="cycle-label">Semana ' + week + ' de 4 · ' + weekInfo.label + '</p>' +
     '<p class="preview-desc">' + describeFormato(w) + '</p>' +
     '<button class="btn btn-primary btn-block" type="button" onclick="startSession(\'' + w.id + '\')">Começar treino</button>' +
     '</div>';
@@ -750,12 +791,8 @@ function renderRestDayCard(schedule){
   return '<div class="card rest-card">' +
     '<h2 class="preview-title">Dia de descanso</h2>' +
     '<p class="preview-desc">Hoje é dia de recuperação. Seu corpo constrói força enquanto descansa — aproveite para se alongar, hidratar bem e dormir cedo.</p>' +
-    '<p class="rest-alt-label">Quer treinar mesmo assim?</p>' +
-    '<div class="rest-alt-buttons">' +
-    '<button class="btn btn-secondary btn-block" type="button" onclick="startSession(\'forca\')">Força</button>' +
-    '<button class="btn btn-secondary btn-block" type="button" onclick="startSession(\'hiit\')">HIIT + Abdômen</button>' +
-    '<button class="btn btn-primary btn-block" type="button" onclick="startSession(\'express\')">Treino Express</button>' +
-    '</div></div>';
+    (schedule.expressOpcional ? '<button class="btn btn-secondary btn-block" type="button" onclick="startSession(\'express\')">Fazer Treino Express mesmo assim</button>' : '') +
+    '</div>';
 }
 
 function renderActiveSession(session, nivel){
@@ -763,6 +800,10 @@ function renderActiveSession(session, nivel){
   var html = '<div class="card session-card">';
   html += '<div class="session-top"><div><span class="pill pill-' + w.corBadge + '">' + w.badge + '</span><span class="session-title">' + w.nome + '</span></div>' +
     '<button class="link-btn danger" type="button" onclick="cancelSession()">Cancelar</button></div>';
+  if(w.formato === 'circuito' || w.formato === 'hiit'){
+    var weekInfo = CICLO_SEMANAS[getWeekInCycle()];
+    html += '<p class="cycle-label">Semana ' + getWeekInCycle() + ' de 4 · ' + weekInfo.label + '</p>';
+  }
   html += '<div class="timer-display" id="sessionTimerDisplay">00:00:00</div>';
   if('wakeLock' in navigator){
     html += '<p class="wakelock-hint">A tela fica acesa durante o treino.</p>';
@@ -957,7 +998,7 @@ function startSession(workoutId){
   var session = {
     workoutId: workoutId,
     startTime: new Date().toISOString(),
-    voltas: w.voltasPorNivel[nivel],
+    voltas: getVoltasForToday(w, nivel),
     roundsCompleted: 0,
     finalizadorRoundsCompleted: 0,
     aquecimentoChecked: w.aquecimento.map(function(){ return false; }),
@@ -1867,51 +1908,4 @@ function musicToggle(){
 function musicNext(){ if(ytPlayer && ytPlayer.nextVideo) ytPlayer.nextVideo(); }
 function musicPrev(){ if(ytPlayer && ytPlayer.previousVideo) ytPlayer.previousVideo(); }
 
-/* ============================================================
-   PWA: SERVICE WORKER + INSTALAÇÃO
-   ============================================================ */
-
-function registerServiceWorker(){
-  if('serviceWorker' in navigator){
-    window.addEventListener('load', function(){
-      navigator.serviceWorker.register('service-worker.js').catch(function(){ /* offline no primeiro load */ });
-    });
-  }
-}
-
-var deferredPrompt = null;
-function setupInstallPrompt(){
-  var btn = document.getElementById('installBtn');
-  window.addEventListener('beforeinstallprompt', function(e){
-    e.preventDefault();
-    deferredPrompt = e;
-    btn.classList.remove('hidden');
-  });
-  btn.addEventListener('click', function(){
-    if(!deferredPrompt) return;
-    deferredPrompt.prompt();
-    deferredPrompt.userChoice.then(function(){ deferredPrompt = null; btn.classList.add('hidden'); });
-  });
-  window.addEventListener('appinstalled', function(){ btn.classList.add('hidden'); });
-}
-
-/* ============================================================
-   INICIALIZAÇÃO
-   ============================================================ */
-
-function init(){
-  document.querySelectorAll('.nav-btn').forEach(function(btn){
-    btn.addEventListener('click', function(){ setTab(btn.dataset.tab); });
-  });
-  document.getElementById('sheetBackdrop').addEventListener('click', closeFinishSheet);
-  setTab('hoje');
-  updateMusicCardVisibility();
-  if(state.activeSession) requestWakeLock();
-  registerServiceWorker();
-  setupInstallPrompt();
-}
-
-document.addEventListener('DOMContentLoaded', init);
-</script>
-</body>
-</html>
+/* =================================================
