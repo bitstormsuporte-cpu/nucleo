@@ -1,3 +1,4 @@
+[README.md](https://github.com/user-attachments/files/31359929/README.md)
 # Núcleo
 
 App de treino em casa (calistenia + cardio, sem equipamento) para acompanhar seus treinos diários no celular. Funciona como **PWA** (Progressive Web App): instalável na tela inicial e funcional **offline** depois do primeiro carregamento.
@@ -37,6 +38,11 @@ Depois de instalado, o app abre em tela cheia (sem a barra do navegador) e conti
 
 Sempre que você alterar `index.html`, `manifest.json` ou `service-worker.js` e publicar de novo, aumente o número de versão em `CACHE_VERSION` no topo de `service-worker.js` (ex: `nucleo-v6` → `nucleo-v7`). Isso garante que o navegador do usuário baixe a versão nova em vez de continuar servindo a versão antiga do cache.
 
+### Correções para iPhone/Safari
+
+- Todos os campos de formulário (reps, medidas, observações) usam fonte de 16px — abaixo disso, o Safari do iPhone dá zoom automático ao tocar no campo, o que (combinado com o `maximum-scale=1` do viewport) podia deixar a tela travada/com zoom preso.
+- O `<link rel="apple-touch-icon">` agora declara `sizes="180x180"` explicitamente, batendo com o tamanho real do arquivo — sem isso o iOS podia redimensionar o ícone da tela inicial de forma inconsistente.
+
 ## Testando localmente
 
 Como o app não depende de build, basta servir a pasta com qualquer servidor HTTP estático (não abra o `index.html` direto com `file://`, pois o Service Worker exige `http://` ou `https://`):
@@ -57,6 +63,14 @@ python3 -m http.server 8000
 
 Todos os dados ficam apenas no navegador do dispositivo usado. Trocar de navegador, usar modo anônimo ou limpar os dados do site apaga o histórico — não há sincronização entre dispositivos.
 
+### Fotos de referência nos exercícios
+
+Cada exercício mostra uma miniatura (foto do Pexels) ao lado do nome, além do link de vídeo. Como nem todo exercício tem uma foto específica disponível, algumas são reaproveitadas entre variações da mesma família de movimento (ex: agachamento e agachamento com salto usam a mesma foto-base). As fotos são carregadas de `images.pexels.com` — na primeira vez que o app abre com internet, o service worker guarda elas em cache (igual já faz com as fontes do Google), então elas continuam aparecendo depois offline. Se uma imagem não carregar (sem internet no primeiro acesso, ou o link mudar no futuro), ela some da tela sem quebrar o layout.
+
+### Relatório mensal
+
+O card "Relatório mensal" na aba Progresso monta um resumo em texto do mês selecionado (treinos concluídos por tipo, tempo total treinado, RPE médio, sequência atual, evolução de peso e recordes batidos naquele mês), com setas pra navegar entre meses. O botão "Compartilhar relatório" usa a Web Share API do navegador (`navigator.share`) para abrir o menu nativo de compartilhamento do celular — de lá dá pra escolher Mail/Gmail, WhatsApp, etc. Em navegadores sem suporte a isso (a maioria dos desktops), cai automaticamente para um link `mailto:` com o relatório pré-preenchido no corpo do email. Não precisa de login nem envia nada para nenhum servidor — é só um resumo formatado dos dados que já estão salvos no aparelho, gerado na hora. Como não há automação em segundo plano (o app não roda quando fechado), o envio é sempre um passo manual: abrir o app e tocar o botão, idealmente uma vez por mês.
+
 ### Backup e restauração
 
 Na aba **Progresso**, o card "Backup dos dados" permite exportar tudo (nível, treinos e medidas) em um arquivo `.json` e importar de volta depois — útil antes de trocar de celular, reinstalar o app ou limpar os dados do site. Importar um backup **substitui** os dados atuais do app (o app pede confirmação antes).
@@ -64,6 +78,14 @@ Na aba **Progresso**, o card "Backup dos dados" permite exportar tudo (nível, t
 ### Tela sempre acesa durante o treino
 
 Enquanto uma sessão de treino está ativa, o app usa a [Wake Lock API](https://developer.mozilla.org/en-US/docs/Web/API/Screen_Wake_Lock_API) para impedir que a tela do celular apague sozinha, já que as mãos costumam estar ocupadas com o exercício. Funciona em Chrome/Android e Safari/iOS 16.4+; em navegadores sem suporte, o app funciona normalmente, só sem esse bloqueio automático de tela.
+
+### Plano mensal com progressão automática
+
+O app decide sozinho o volume do treino do dia, seguindo um ciclo de 4 semanas que se repete indefinidamente a partir do primeiro uso: Semana 1 (Adaptação) e Semana 2 (Construção) usam o número de voltas padrão do nível escolhido, Semana 3 (Pico) soma +1 volta, e Semana 4 (Deload) reduz -1 volta pra permitir recuperação — mesmo princípio de deload já explicado na aba Treinos. O rótulo "Semana X de 4" aparece no card do treino do dia e durante a sessão ativa. O Treino Express não entra nessa progressão (continua sempre no volume padrão, pensado pra dias de pouca energia). Isso não muda a meta de reps/tempo por exercício — só o número de séries do circuito, mantendo a personalização por nível (Iniciante/Intermediário/Avançado) como está.
+
+### Aviso de esforço alto e gráfico de resistência
+
+Se 2 dos últimos 3 treinos registrados vierem com RPE 4 ou 5, a aba Hoje mostra um aviso de fadiga acumulada com um botão pra baixar de nível na hora (ex: Avançado → Intermediário). Na aba Progresso, o card "Resistência (esforço percebido)" mostra um gráfico do RPE de cada treino ao longo do tempo, com uma leitura simples de tendência (caindo, estável ou subindo) comparando os treinos mais recentes com os anteriores — RPE caindo pra um volume parecido de treino é um bom sinal de que o condicionamento está melhorando.
 
 ### Descanso automático entre séries
 
