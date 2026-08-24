@@ -27,9 +27,9 @@
     --text-tertiary:rgba(255,255,255,.38);
     --border:rgba(255,255,255,.12);
     --border-strong:rgba(255,255,255,.3);
-    --accent:#FF3B30;
-    --accent-tint:rgba(255,59,48,.14);
-    --on-accent:#FFFFFF;
+    --accent:#CEFF00;
+    --accent-tint:rgba(206,255,0,.14);
+    --on-accent:#0A0A0A;
     --success:#22C55E;
     --success-tint:rgba(34,197,94,.14);
     --radius:0px;
@@ -117,7 +117,7 @@
   /* Pills / badges */
   .pill{ display:inline-block; font-family:var(--font-display); font-size:10px; text-transform:uppercase; letter-spacing:.07em; font-weight:600; padding:4px 9px; border-radius:2px; margin-bottom:6px; }
   .pill-green{ background:transparent; color:var(--text); border:1px solid var(--border-strong); }
-  .pill-orange{ background:var(--accent-tint); color:var(--accent); border:1px solid rgba(255,59,48,.4); }
+  .pill-orange{ background:var(--accent-tint); color:var(--accent); border:1px solid rgba(206,255,0,.4); }
   .pill-muted{ background:var(--card-alt); color:var(--text-secondary); border:1px solid var(--border); }
 
   /* Today: preview / rest cards */
@@ -128,9 +128,9 @@
   .rest-card .preview-desc{ margin-bottom:16px; }
   .rest-alt-label{ font-size:12px; font-weight:600; color:var(--text-secondary); text-transform:uppercase; letter-spacing:.04em; margin-bottom:10px; }
   .rest-alt-buttons{ display:flex; flex-direction:column; gap:10px; }
-  .rpe-warning-card{ border-color:rgba(255,59,48,.4); background:var(--accent-tint); }
+  .rpe-warning-card{ border-color:rgba(206,255,0,.4); background:var(--accent-tint); }
   .rpe-warning-title{ font-family:var(--font-display); text-transform:uppercase; font-size:13px; letter-spacing:.03em; color:var(--accent); margin-bottom:4px; }
-  .ensaio-note{ font-size:13px; font-weight:600; color:var(--accent); padding:10px 14px; border:1px solid rgba(255,59,48,.35); background:var(--accent-tint); margin-bottom:14px; }
+  .ensaio-note{ font-size:13px; font-weight:600; color:var(--accent); padding:10px 14px; border:1px solid rgba(206,255,0,.35); background:var(--accent-tint); margin-bottom:14px; }
   .done-today-card{ border-color:rgba(34,197,94,.4); background:var(--success-tint); }
   .done-today-title{ font-family:var(--font-display); text-transform:uppercase; font-size:13px; letter-spacing:.05em; color:var(--success); margin-bottom:4px; }
   .done-today-line{ font-size:13px; color:var(--text); font-family:var(--font-mono); }
@@ -153,6 +153,7 @@
   /* Exercise rows */
   .exercise-row{ display:flex; align-items:center; justify-content:space-between; gap:10px; padding:12px 0; border-bottom:1px solid var(--border); }
   .exercise-row:last-child{ border-bottom:none; }
+  .exercise-thumb{ width:52px; height:52px; border-radius:var(--radius-sm); object-fit:cover; flex-shrink:0; background:var(--card-alt); }
   .exercise-info{ flex:1; min-width:0; }
   .exercise-name{ font-size:14px; font-weight:600; margin-bottom:2px; }
   .exercise-meta{ font-size:12px; color:var(--text-secondary); font-family:var(--font-mono); }
@@ -163,11 +164,11 @@
   .exercise-input{ width:58px; padding:8px 6px; text-align:center; border:1px solid var(--border); border-radius:var(--radius-sm); background:var(--card-alt); color:var(--text); font-family:var(--font-mono); font-size:16px; font-weight:600; }
   .exercise-unit{ font-size:11px; color:var(--text-secondary); width:32px; }
   .finalizador-block{ background:var(--accent-tint); border-radius:var(--radius-sm); padding:12px; margin-top:20px; border-top:none; }
-  .finalizador-block .exercise-row{ border-bottom-color:rgba(255,59,48,.2); }
+  .finalizador-block .exercise-row{ border-bottom-color:rgba(206,255,0,.2); }
 
   /* Interval timer */
   .interval-panel{ background:var(--card-alt); border:1px solid var(--border); border-radius:var(--radius); padding:14px; margin-bottom:4px; transition:background-color .3s ease, border-color .3s ease; }
-  .interval-panel.phase-esforco{ background:var(--accent-tint); border-color:rgba(255,59,48,.4); }
+  .interval-panel.phase-esforco{ background:var(--accent-tint); border-color:rgba(206,255,0,.4); }
   .interval-panel.phase-descanso{ background:var(--success-tint); border-color:rgba(34,197,94,.4); }
   .interval-header{ display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
   .mute-btn{ font-size:11px; color:var(--text-secondary); text-transform:uppercase; letter-spacing:.05em; font-family:var(--font-display); }
@@ -241,7 +242,7 @@
   .cal-cell.empty{ border:none; background:transparent; }
   .cal-cell.done{ background:var(--success); color:#04170B; border-color:var(--success); font-weight:700; }
   .cal-cell.rest{ background:transparent; color:var(--text-secondary); }
-  .cal-cell.missed{ background:rgba(255,59,48,.08); color:rgba(255,59,48,.75); }
+  .cal-cell.missed{ background:rgba(206,255,0,.08); color:rgba(206,255,0,.75); }
   .cal-cell.is-today{ box-shadow:0 0 0 2px var(--accent) inset; font-weight:700; color:var(--text); }
 
   /* PR cards */
@@ -406,6 +407,37 @@ var VIDEOS = {
   prancha_falha: 'https://www.youtube.com/shorts/rttTAImJW-A'
 };
 
+// Fotos de referência (Pexels), agrupadas por família de movimento quando não há
+// uma foto específica daquele exercício exato — sempre fotos reais verificadas,
+// nunca URLs inventadas.
+var PEXELS_IDS = {
+  agachamento: 4164454,        // agachamento / agachamento com salto
+  flexao_braco: 7187868,       // flexão de braço / burpee
+  prancha: 14074802,           // prancha e variações (toque no ombro, lateral, escalador)
+  polichinelo: 7298411,
+  abdominal_core: 14036850,    // abdominal remador / bicicleta / elevação de pernas
+  generico: 866027             // afundo alternado / ponte de glúteo
+};
+function pexelsUrl(id){ return 'https://images.pexels.com/photos/' + id + '/pexels-photo-' + id + '.jpeg?auto=compress&cs=tinysrgb&w=300'; }
+
+var IMAGES = {
+  agachamento: pexelsUrl(PEXELS_IDS.agachamento),
+  flexao_braco: pexelsUrl(PEXELS_IDS.flexao_braco),
+  afundo_alternado: pexelsUrl(PEXELS_IDS.generico),
+  prancha: pexelsUrl(PEXELS_IDS.prancha),
+  ponte_gluteo: pexelsUrl(PEXELS_IDS.generico),
+  abdominal_bicicleta: pexelsUrl(PEXELS_IDS.abdominal_core),
+  polichinelo: pexelsUrl(PEXELS_IDS.polichinelo),
+  agachamento_salto: pexelsUrl(PEXELS_IDS.agachamento),
+  escalador: pexelsUrl(PEXELS_IDS.prancha),
+  burpee: pexelsUrl(PEXELS_IDS.flexao_braco),
+  prancha_toque_ombro: pexelsUrl(PEXELS_IDS.prancha),
+  abdominal_remador: pexelsUrl(PEXELS_IDS.abdominal_core),
+  prancha_lateral: pexelsUrl(PEXELS_IDS.prancha),
+  elevacao_pernas: pexelsUrl(PEXELS_IDS.abdominal_core),
+  prancha_falha: pexelsUrl(PEXELS_IDS.prancha)
+};
+
 var WORKOUTS = {
   forca: {
     id: 'forca',
@@ -423,12 +455,12 @@ var WORKOUTS = {
       { nome: 'Agachamento sem peso', meta: '10x' }
     ],
     exercicios: [
-      { id: 'agachamento', nome: 'Agachamento', unidade: 'reps', metas: { iniciante: '12-15', intermediario: '15-20', avancado: '20-25' }, video: VIDEOS.agachamento },
-      { id: 'flexao_braco', nome: 'Flexão de braço', unidade: 'reps', metas: { iniciante: '8-10 (apoio no joelho)', intermediario: '10-15', avancado: '15-20 ou pés elevados' }, video: VIDEOS.flexao_braco },
-      { id: 'afundo_alternado', nome: 'Afundo alternado', unidade: 'reps', metas: { iniciante: '8/perna', intermediario: '12/perna', avancado: '15/perna ou búlgaro' }, video: VIDEOS.afundo_alternado },
-      { id: 'prancha', nome: 'Prancha', unidade: 'segundos', metas: { iniciante: '20-30s', intermediario: '40-60s', avancado: '60-90s' }, video: VIDEOS.prancha },
-      { id: 'ponte_gluteo', nome: 'Ponte de glúteo', unidade: 'reps', metas: { iniciante: '12', intermediario: '15-20', avancado: '10/perna (unilateral)' }, video: VIDEOS.ponte_gluteo },
-      { id: 'abdominal_bicicleta', nome: 'Abdominal bicicleta', unidade: 'reps', metas: { iniciante: '12', intermediario: '20', avancado: '30' }, video: VIDEOS.abdominal_bicicleta }
+      { id: 'agachamento', nome: 'Agachamento', unidade: 'reps', metas: { iniciante: '12-15', intermediario: '15-20', avancado: '20-25' }, video: VIDEOS.agachamento, imagem: IMAGES.agachamento },
+      { id: 'flexao_braco', nome: 'Flexão de braço', unidade: 'reps', metas: { iniciante: '8-10 (apoio no joelho)', intermediario: '10-15', avancado: '15-20 ou pés elevados' }, video: VIDEOS.flexao_braco, imagem: IMAGES.flexao_braco },
+      { id: 'afundo_alternado', nome: 'Afundo alternado', unidade: 'reps', metas: { iniciante: '8/perna', intermediario: '12/perna', avancado: '15/perna ou búlgaro' }, video: VIDEOS.afundo_alternado, imagem: IMAGES.afundo_alternado },
+      { id: 'prancha', nome: 'Prancha', unidade: 'segundos', metas: { iniciante: '20-30s', intermediario: '40-60s', avancado: '60-90s' }, video: VIDEOS.prancha, imagem: IMAGES.prancha },
+      { id: 'ponte_gluteo', nome: 'Ponte de glúteo', unidade: 'reps', metas: { iniciante: '12', intermediario: '15-20', avancado: '10/perna (unilateral)' }, video: VIDEOS.ponte_gluteo, imagem: IMAGES.ponte_gluteo },
+      { id: 'abdominal_bicicleta', nome: 'Abdominal bicicleta', unidade: 'reps', metas: { iniciante: '12', intermediario: '20', avancado: '30' }, video: VIDEOS.abdominal_bicicleta, imagem: IMAGES.abdominal_bicicleta }
     ],
     finalizador: null,
     alongamentoFinal: '3-5 min'
@@ -449,19 +481,19 @@ var WORKOUTS = {
       { nome: 'Rotação de ombro e quadril', meta: '30s' }
     ],
     exercicios: [
-      { id: 'polichinelo', nome: 'Polichinelo (jumping jack)', unidade: 'reps', metaFixa: 'Ritmo constante durante o esforço', video: VIDEOS.polichinelo },
-      { id: 'agachamento_salto', nome: 'Agachamento com salto', unidade: 'reps', variacoes: { iniciante: 'Versão normal (sem salto)', intermediario: 'Com salto', avancado: 'Com salto + pausa' }, video: VIDEOS.agachamento_salto },
-      { id: 'escalador', nome: 'Escalador (mountain climber)', unidade: 'reps', metaFixa: 'Ritmo constante durante o esforço', video: VIDEOS.escalador },
-      { id: 'burpee', nome: 'Burpee', unidade: 'reps', variacoes: { iniciante: 'Sem salto e sem flexão', intermediario: 'Completo', avancado: '+ flexão e salto alto' }, video: VIDEOS.burpee },
-      { id: 'prancha_toque_ombro', nome: 'Prancha com toque no ombro', unidade: 'reps', metaFixa: 'Ritmo constante durante o esforço', video: VIDEOS.prancha_toque_ombro }
+      { id: 'polichinelo', nome: 'Polichinelo (jumping jack)', unidade: 'reps', metaFixa: 'Ritmo constante durante o esforço', video: VIDEOS.polichinelo, imagem: IMAGES.polichinelo },
+      { id: 'agachamento_salto', nome: 'Agachamento com salto', unidade: 'reps', variacoes: { iniciante: 'Versão normal (sem salto)', intermediario: 'Com salto', avancado: 'Com salto + pausa' }, video: VIDEOS.agachamento_salto, imagem: IMAGES.agachamento_salto },
+      { id: 'escalador', nome: 'Escalador (mountain climber)', unidade: 'reps', metaFixa: 'Ritmo constante durante o esforço', video: VIDEOS.escalador, imagem: IMAGES.escalador },
+      { id: 'burpee', nome: 'Burpee', unidade: 'reps', variacoes: { iniciante: 'Sem salto e sem flexão', intermediario: 'Completo', avancado: '+ flexão e salto alto' }, video: VIDEOS.burpee, imagem: IMAGES.burpee },
+      { id: 'prancha_toque_ombro', nome: 'Prancha com toque no ombro', unidade: 'reps', metaFixa: 'Ritmo constante durante o esforço', video: VIDEOS.prancha_toque_ombro, imagem: IMAGES.prancha_toque_ombro }
     ],
     finalizador: {
       titulo: 'Finalizador',
       series: 3,
       exercicios: [
-        { id: 'abdominal_remador', nome: 'Abdominal remador', unidade: 'reps', metas: { iniciante: '10', intermediario: '15', avancado: '20' }, video: VIDEOS.abdominal_remador },
-        { id: 'prancha_lateral', nome: 'Prancha lateral', unidade: 'segundos', metas: { iniciante: '15-20s por lado', intermediario: '20-30s por lado', avancado: '30-45s por lado' }, video: VIDEOS.prancha_lateral },
-        { id: 'elevacao_pernas', nome: 'Elevação de pernas', unidade: 'reps', metas: { iniciante: '8-10', intermediario: '12-15', avancado: '15-20' }, video: VIDEOS.elevacao_pernas }
+        { id: 'abdominal_remador', nome: 'Abdominal remador', unidade: 'reps', metas: { iniciante: '10', intermediario: '15', avancado: '20' }, video: VIDEOS.abdominal_remador, imagem: IMAGES.abdominal_remador },
+        { id: 'prancha_lateral', nome: 'Prancha lateral', unidade: 'segundos', metas: { iniciante: '15-20s por lado', intermediario: '20-30s por lado', avancado: '30-45s por lado' }, video: VIDEOS.prancha_lateral, imagem: IMAGES.prancha_lateral },
+        { id: 'elevacao_pernas', nome: 'Elevação de pernas', unidade: 'reps', metas: { iniciante: '8-10', intermediario: '12-15', avancado: '15-20' }, video: VIDEOS.elevacao_pernas, imagem: IMAGES.elevacao_pernas }
       ]
     },
     alongamentoFinal: null
@@ -482,18 +514,18 @@ var WORKOUTS = {
       { nome: 'Rotação de ombro e quadril', meta: '30s' }
     ],
     exercicios: [
-      { id: 'agachamento', nome: 'Agachamento', unidade: 'reps', metaFixa: '45s', video: VIDEOS.agachamento },
-      { id: 'flexao_braco', nome: 'Flexão de braço', unidade: 'reps', metaFixa: '45s (apoio no joelho se precisar)', video: VIDEOS.flexao_braco },
-      { id: 'escalador', nome: 'Escalador', unidade: 'reps', metaFixa: '45s', video: VIDEOS.escalador },
-      { id: 'prancha', nome: 'Prancha', unidade: 'segundos', metaFixa: '45s (segure o máximo possível)', video: VIDEOS.prancha },
-      { id: 'afundo_alternado', nome: 'Afundo alternado', unidade: 'reps', metaFixa: '45s', video: VIDEOS.afundo_alternado }
+      { id: 'agachamento', nome: 'Agachamento', unidade: 'reps', metaFixa: '45s', video: VIDEOS.agachamento, imagem: IMAGES.agachamento },
+      { id: 'flexao_braco', nome: 'Flexão de braço', unidade: 'reps', metaFixa: '45s (apoio no joelho se precisar)', video: VIDEOS.flexao_braco, imagem: IMAGES.flexao_braco },
+      { id: 'escalador', nome: 'Escalador', unidade: 'reps', metaFixa: '45s', video: VIDEOS.escalador, imagem: IMAGES.escalador },
+      { id: 'prancha', nome: 'Prancha', unidade: 'segundos', metaFixa: '45s (segure o máximo possível)', video: VIDEOS.prancha, imagem: IMAGES.prancha },
+      { id: 'afundo_alternado', nome: 'Afundo alternado', unidade: 'reps', metaFixa: '45s', video: VIDEOS.afundo_alternado, imagem: IMAGES.afundo_alternado }
     ],
     finalizador: {
       titulo: 'Finalizador (3 min)',
       series: 1,
       exercicios: [
-        { id: 'abdominal_bicicleta', nome: 'Abdominal bicicleta', unidade: 'reps', metaFixa: '15 reps', video: VIDEOS.abdominal_bicicleta },
-        { id: 'prancha_falha', nome: 'Prancha até falhar', unidade: 'segundos', metaFixa: 'Até falhar — supere seu recorde', video: VIDEOS.prancha_falha }
+        { id: 'abdominal_bicicleta', nome: 'Abdominal bicicleta', unidade: 'reps', metaFixa: '15 reps', video: VIDEOS.abdominal_bicicleta, imagem: IMAGES.abdominal_bicicleta },
+        { id: 'prancha_falha', nome: 'Prancha até falhar', unidade: 'segundos', metaFixa: 'Até falhar — supere seu recorde', video: VIDEOS.prancha_falha, imagem: IMAGES.prancha_falha }
       ]
     },
     alongamentoFinal: null
@@ -958,6 +990,11 @@ function renderVideoLink(ex){
     'Vídeo</a>';
 }
 
+function renderExerciseThumb(ex){
+  if(!ex.imagem) return '';
+  return '<img class="exercise-thumb" src="' + ex.imagem + '" alt="' + ex.nome + '" loading="lazy" onerror="this.remove()">';
+}
+
 function renderExerciseSessionRow(ex, nivel, currentValue, bucket){
   var meta = getMetaText(ex, nivel);
   var pr = getPR(ex.id);
@@ -965,6 +1002,7 @@ function renderExerciseSessionRow(ex, nivel, currentValue, bucket){
   var val = (currentValue === undefined || currentValue === null) ? '' : currentValue;
   var prLine = pr ? '<p class="exercise-pr">PR: ' + pr.valor + (ex.unidade === 'segundos' ? 's' : ' reps') + ' · ' + fmtDateDisplay(pr.data) + '</p>' : '';
   return '<div class="exercise-row">' +
+    renderExerciseThumb(ex) +
     '<div class="exercise-info"><p class="exercise-name">' + ex.nome + '</p>' +
     '<p class="exercise-meta">Meta: ' + (meta || '—') + '</p>' + prLine + renderVideoLink(ex) + '</div>' +
     '<div class="exercise-input-wrap">' +
@@ -1341,7 +1379,9 @@ function renderWorkoutCardBody(w, nivel){
 
 function renderExerciseLibraryRow(ex, nivel){
   var meta = getMetaText(ex, nivel);
-  return '<div class="exercise-row read-only"><div class="exercise-info">' +
+  return '<div class="exercise-row read-only">' +
+    renderExerciseThumb(ex) +
+    '<div class="exercise-info">' +
     '<p class="exercise-name">' + ex.nome + '</p>' +
     '<p class="exercise-meta">' + (meta || '—') + '</p>' + renderVideoLink(ex) + '</div></div>';
 }
@@ -1641,7 +1681,7 @@ function renderEnduranceChart(){
   });
   var pathD = xy.map(function(c, i){ return (i === 0 ? 'M' : 'L') + c[0].toFixed(1) + ',' + c[1].toFixed(1); }).join(' ');
   var dots = xy.map(function(c, i){
-    return '<circle cx="' + c[0].toFixed(1) + '" cy="' + c[1].toFixed(1) + '" r="3.5" fill="#FF3B30"><title>' + fmtDateDisplay(sessions[i].data) + ': RPE ' + sessions[i].rpe + '</title></circle>';
+    return '<circle cx="' + c[0].toFixed(1) + '" cy="' + c[1].toFixed(1) + '" r="3.5" fill="#CEFF00"><title>' + fmtDateDisplay(sessions[i].data) + ': RPE ' + sessions[i].rpe + '</title></circle>';
   }).join('');
 
   var gridLines = '';
@@ -1653,7 +1693,7 @@ function renderEnduranceChart(){
 
   var svg = '<svg class="chart-svg" viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none" role="img" aria-label="Gráfico de esforço percebido (RPE) ao longo do tempo">' +
     gridLines +
-    '<path d="' + pathD + '" fill="none" stroke="#FF3B30" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>' +
+    '<path d="' + pathD + '" fill="none" stroke="#CEFF00" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>' +
     dots + '</svg>';
 
   return svg + renderRpeTrendSummary(sessions);
@@ -1698,7 +1738,7 @@ function renderWeightChart(measurements){
   var pathD = xy.map(function(c, i){ return (i === 0 ? 'M' : 'L') + c[0].toFixed(1) + ',' + c[1].toFixed(1); }).join(' ');
   var areaD = pathD + ' L' + xy[xy.length - 1][0].toFixed(1) + ',' + (H - padB) + ' L' + xy[0][0].toFixed(1) + ',' + (H - padB) + ' Z';
   var dots = xy.map(function(c, i){
-    return '<circle cx="' + c[0].toFixed(1) + '" cy="' + c[1].toFixed(1) + '" r="3.5" fill="#FF3B30"><title>' + fmtDateDisplay(pts[i].data) + ': ' + pts[i].peso + 'kg</title></circle>';
+    return '<circle cx="' + c[0].toFixed(1) + '" cy="' + c[1].toFixed(1) + '" r="3.5" fill="#CEFF00"><title>' + fmtDateDisplay(pts[i].data) + ': ' + pts[i].peso + 'kg</title></circle>';
   }).join('');
 
   return '<svg class="chart-svg" viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none" role="img" aria-label="Gráfico de evolução do peso">' +
@@ -1707,8 +1747,8 @@ function renderWeightChart(measurements){
     '<text x="' + (W - padR) + '" y="' + (H - 8) + '" font-size="9" fill="rgba(255,255,255,.6)" font-family="IBM Plex Mono" text-anchor="end">' + fmtDateDisplay(pts[pts.length - 1].data) + '</text>' +
     '<text x="2" y="' + (padT + 4) + '" font-size="9" fill="rgba(255,255,255,.6)" font-family="IBM Plex Mono">' + max.toFixed(1) + '</text>' +
     '<text x="2" y="' + (H - padB) + '" font-size="9" fill="rgba(255,255,255,.6)" font-family="IBM Plex Mono">' + min.toFixed(1) + '</text>' +
-    '<path d="' + areaD + '" fill="#FF3B30" opacity="0.15" stroke="none"/>' +
-    '<path d="' + pathD + '" fill="none" stroke="#FF3B30" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>' +
+    '<path d="' + areaD + '" fill="#CEFF00" opacity="0.15" stroke="none"/>' +
+    '<path d="' + pathD + '" fill="none" stroke="#CEFF00" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>' +
     dots + '</svg>';
 }
 
