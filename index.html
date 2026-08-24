@@ -9,7 +9,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="favicon.ico">
 <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
-<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Núcleo">
@@ -160,7 +160,7 @@
   .video-link{ display:inline-flex; align-items:center; gap:4px; margin-top:4px; font-size:11px; font-weight:600; color:var(--success); text-decoration:none; }
   .video-link:active{ opacity:.7; }
   .exercise-input-wrap{ display:flex; align-items:center; gap:6px; flex-shrink:0; }
-  .exercise-input{ width:58px; padding:8px 6px; text-align:center; border:1px solid var(--border); border-radius:var(--radius-sm); background:var(--card-alt); color:var(--text); font-family:var(--font-mono); font-size:15px; font-weight:600; }
+  .exercise-input{ width:58px; padding:8px 6px; text-align:center; border:1px solid var(--border); border-radius:var(--radius-sm); background:var(--card-alt); color:var(--text); font-family:var(--font-mono); font-size:16px; font-weight:600; }
   .exercise-unit{ font-size:11px; color:var(--text-secondary); width:32px; }
   .finalizador-block{ background:var(--accent-tint); border-radius:var(--radius-sm); padding:12px; margin-top:20px; border-top:none; }
   .finalizador-block .exercise-row{ border-bottom-color:rgba(255,59,48,.2); }
@@ -182,10 +182,13 @@
 
   /* Forms */
   .field-label{ display:block; font-size:12px; font-weight:600; color:var(--text-secondary); margin:10px 0 4px; }
-  .field-input{ width:100%; padding:11px 12px; border:1px solid var(--border); border-radius:var(--radius-sm); background:var(--card-alt); color:var(--text); font-size:15px; font-family:var(--font-mono); }
+  .field-input{ width:100%; padding:11px 12px; border:1px solid var(--border); border-radius:var(--radius-sm); background:var(--card-alt); color:var(--text); font-size:16px; font-family:var(--font-mono); }
   .field-grid{ display:grid; grid-template-columns:1fr 1fr; gap:0 12px; }
   form .btn{ margin-top:16px; }
   .backup-actions{ display:flex; flex-direction:column; gap:10px; margin-top:14px; }
+  .report-month-nav{ display:flex; align-items:center; justify-content:center; gap:16px; margin-bottom:12px; }
+  .report-month-label{ font-family:var(--font-display); text-transform:uppercase; font-size:14px; letter-spacing:.04em; min-width:150px; text-align:center; }
+  .report-preview{ background:var(--card-alt); border:1px solid var(--border); padding:12px; font-family:var(--font-mono); font-size:12px; line-height:1.6; white-space:pre-wrap; word-break:break-word; margin:0 0 14px; color:var(--text-secondary); max-height:260px; overflow-y:auto; }
 
   /* Level selector */
   .level-selector{ display:flex; gap:8px; }
@@ -272,7 +275,7 @@
   .rpe-btn.selected .rpe-num, .rpe-btn.selected .rpe-label{ color:var(--on-accent); }
   .rpe-num{ font-family:var(--font-mono); font-size:17px; font-weight:700; }
   .rpe-label{ font-size:9px; text-align:center; color:var(--text-secondary); line-height:1.2; }
-  .notes-input{ width:100%; padding:11px 12px; border:1px solid var(--border); border-radius:var(--radius-sm); background:var(--card-alt); color:var(--text); font-size:14px; resize:vertical; }
+  .notes-input{ width:100%; padding:11px 12px; border:1px solid var(--border); border-radius:var(--radius-sm); background:var(--card-alt); color:var(--text); font-size:16px; resize:vertical; }
   .sheet-actions{ display:flex; gap:10px; margin-top:18px; }
   .sheet-actions .btn{ flex:1; }
 
@@ -1387,9 +1390,142 @@ function renderProgresso(){
   html += '<div class="card"><h3 class="section-title">Histórico de medidas</h3>' + renderMeasurementsTable(measurements) + '</div>';
   html += '<div class="card"><h3 class="section-title">Últimas 4 semanas</h3>' + renderCalendar() + '</div>';
   html += '<div class="card"><h3 class="section-title">Recordes pessoais</h3>' + renderPRCards() + '</div>';
+  html += renderReportCard();
   html += renderBackupCard();
 
   container.innerHTML = html;
+}
+
+/* --- Relatório mensal --- */
+
+var MESES_NOMES = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+
+function ensureReportMonthInit(){
+  if(state.reportYear == null){
+    var now = new Date();
+    state.reportYear = now.getFullYear();
+    state.reportMonth = now.getMonth();
+  }
+}
+
+function changeReportMonth(delta){
+  ensureReportMonthInit();
+  state.reportMonth += delta;
+  if(state.reportMonth < 0){ state.reportMonth = 11; state.reportYear--; }
+  if(state.reportMonth > 11){ state.reportMonth = 0; state.reportYear++; }
+  renderProgresso();
+}
+
+function fmtHoursMinutes(totalSeconds){
+  var totalMin = Math.round((totalSeconds || 0) / 60);
+  var h = Math.floor(totalMin / 60);
+  var m = totalMin % 60;
+  if(h === 0) return m + 'min';
+  return h + 'h' + (m > 0 ? ' ' + m + 'min' : '');
+}
+
+function getPRsInMonth(year, month){
+  var bestMap = {};
+  getSessions().forEach(function(s){
+    (s.resultados || []).forEach(function(r){
+      if(typeof r.valor === 'number' && !isNaN(r.valor)){
+        if(!bestMap[r.exercicioId] || r.valor > bestMap[r.exercicioId].valor){
+          bestMap[r.exercicioId] = { valor: r.valor, data: s.data, nome: r.nome, unidade: r.unidade };
+        }
+      }
+    });
+  });
+  return Object.keys(bestMap).map(function(k){ return bestMap[k]; }).filter(function(pr){
+    var d = new Date(pr.data + 'T00:00:00');
+    return d.getFullYear() === year && d.getMonth() === month;
+  }).sort(function(a, b){ return a.nome.localeCompare(b.nome); });
+}
+
+function buildMonthlyReport(year, month){
+  var sessions = getSessions().filter(function(s){
+    var d = new Date(s.data + 'T00:00:00');
+    return d.getFullYear() === year && d.getMonth() === month;
+  }).sort(function(a, b){ return a.data.localeCompare(b.data); });
+
+  var measurements = getMeasurements().filter(function(m){
+    var d = new Date(m.data + 'T00:00:00');
+    return d.getFullYear() === year && d.getMonth() === month && typeof m.peso === 'number';
+  }).sort(function(a, b){ return a.data.localeCompare(b.data); });
+
+  var porTipo = {};
+  var duracaoTotal = 0, rpeSum = 0;
+  sessions.forEach(function(s){
+    porTipo[s.tipo] = (porTipo[s.tipo] || 0) + 1;
+    duracaoTotal += s.duracaoSegundos || 0;
+    rpeSum += s.rpe || 0;
+  });
+
+  var linhas = [];
+  linhas.push('RELATÓRIO DE TREINO — ' + MESES_NOMES[month].toUpperCase() + ' DE ' + year);
+  linhas.push('');
+  if(!sessions.length){
+    linhas.push('Nenhum treino registrado neste mês.');
+  } else {
+    linhas.push('Treinos concluídos: ' + sessions.length + ' (Força: ' + (porTipo.forca || 0) + ', HIIT: ' + (porTipo.hiit || 0) + ', Express: ' + (porTipo.express || 0) + ')');
+    linhas.push('Tempo total treinado: ' + fmtHoursMinutes(duracaoTotal));
+    linhas.push('RPE médio: ' + (rpeSum / sessions.length).toFixed(1) + ' / 5');
+  }
+  linhas.push('Sequência atual: ' + computeStreak(getSessions(), new Date()) + ' dias');
+
+  if(measurements.length){
+    var pesoInicio = measurements[0].peso;
+    var pesoFim = measurements[measurements.length - 1].peso;
+    var delta = Math.round((pesoFim - pesoInicio) * 10) / 10;
+    var deltaTexto = delta === 0 ? 'sem variação' : (delta > 0 ? '+' + delta + 'kg' : delta + 'kg');
+    linhas.push('Peso: ' + pesoInicio + 'kg → ' + pesoFim + 'kg (' + deltaTexto + ')');
+  }
+
+  var prs = getPRsInMonth(year, month);
+  if(prs.length){
+    linhas.push('');
+    linhas.push('Recordes batidos neste mês:');
+    prs.forEach(function(pr){
+      linhas.push('- ' + pr.nome + ': ' + pr.valor + (pr.unidade === 'segundos' ? 's' : ' reps'));
+    });
+  }
+
+  linhas.push('');
+  linhas.push('Gerado pelo Núcleo em ' + fmtDateDisplay(fmtDate(new Date())));
+  return linhas.join('\n');
+}
+
+function renderReportCard(){
+  ensureReportMonthInit();
+  var label = MESES_NOMES[state.reportMonth] + ' de ' + state.reportYear;
+  var preview = buildMonthlyReport(state.reportYear, state.reportMonth);
+  return '<div class="card">' +
+    '<h3 class="section-title">Relatório mensal</h3>' +
+    '<div class="report-month-nav">' +
+    '<button type="button" class="stepper-btn" aria-label="Mês anterior" onclick="changeReportMonth(-1)">‹</button>' +
+    '<span class="report-month-label">' + label + '</span>' +
+    '<button type="button" class="stepper-btn" aria-label="Próximo mês" onclick="changeReportMonth(1)">›</button>' +
+    '</div>' +
+    '<pre class="report-preview">' + escapeHtml(preview) + '</pre>' +
+    '<button type="button" class="btn btn-primary btn-block" onclick="shareMonthlyReport()">Compartilhar relatório</button>' +
+    '</div>';
+}
+
+function shareMonthlyReport(){
+  var text = buildMonthlyReport(state.reportYear, state.reportMonth);
+  var label = MESES_NOMES[state.reportMonth] + ' de ' + state.reportYear;
+  if(navigator.share){
+    navigator.share({ title: 'Relatório de Treino — ' + label, text: text }).catch(function(){
+      openReportMailFallback(text);
+    });
+  } else {
+    openReportMailFallback(text);
+  }
+}
+
+function openReportMailFallback(text){
+  var subject = encodeURIComponent('Relatório de Treino - Núcleo');
+  var body = encodeURIComponent(text);
+  window.location.href = 'mailto:?subject=' + subject + '&body=' + body;
 }
 
 function renderBackupCard(){
@@ -1908,4 +2044,51 @@ function musicToggle(){
 function musicNext(){ if(ytPlayer && ytPlayer.nextVideo) ytPlayer.nextVideo(); }
 function musicPrev(){ if(ytPlayer && ytPlayer.previousVideo) ytPlayer.previousVideo(); }
 
-/* =================================================
+/* ============================================================
+   PWA: SERVICE WORKER + INSTALAÇÃO
+   ============================================================ */
+
+function registerServiceWorker(){
+  if('serviceWorker' in navigator){
+    window.addEventListener('load', function(){
+      navigator.serviceWorker.register('service-worker.js').catch(function(){ /* offline no primeiro load */ });
+    });
+  }
+}
+
+var deferredPrompt = null;
+function setupInstallPrompt(){
+  var btn = document.getElementById('installBtn');
+  window.addEventListener('beforeinstallprompt', function(e){
+    e.preventDefault();
+    deferredPrompt = e;
+    btn.classList.remove('hidden');
+  });
+  btn.addEventListener('click', function(){
+    if(!deferredPrompt) return;
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(function(){ deferredPrompt = null; btn.classList.add('hidden'); });
+  });
+  window.addEventListener('appinstalled', function(){ btn.classList.add('hidden'); });
+}
+
+/* ============================================================
+   INICIALIZAÇÃO
+   ============================================================ */
+
+function init(){
+  document.querySelectorAll('.nav-btn').forEach(function(btn){
+    btn.addEventListener('click', function(){ setTab(btn.dataset.tab); });
+  });
+  document.getElementById('sheetBackdrop').addEventListener('click', closeFinishSheet);
+  setTab('hoje');
+  updateMusicCardVisibility();
+  if(state.activeSession) requestWakeLock();
+  registerServiceWorker();
+  setupInstallPrompt();
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
