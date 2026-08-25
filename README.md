@@ -1,4 +1,4 @@
-[README.md](https://github.com/user-attachments/files/31359929/README.md)
+[README.md](https://github.com/user-attachments/files/31397859/README.md)
 # Núcleo
 
 App de treino em casa (calistenia + cardio, sem equipamento) para acompanhar seus treinos diários no celular. Funciona como **PWA** (Progressive Web App): instalável na tela inicial e funcional **offline** depois do primeiro carregamento.
@@ -87,9 +87,17 @@ O app decide sozinho o volume do treino do dia, seguindo um ciclo de 4 semanas q
 
 Se 2 dos últimos 3 treinos registrados vierem com RPE 4 ou 5, a aba Hoje mostra um aviso de fadiga acumulada com um botão pra baixar de nível na hora (ex: Avançado → Intermediário). Na aba Progresso, o card "Resistência (esforço percebido)" mostra um gráfico do RPE de cada treino ao longo do tempo, com uma leitura simples de tendência (caindo, estável ou subindo) comparando os treinos mais recentes com os anteriores — RPE caindo pra um volume parecido de treino é um bom sinal de que o condicionamento está melhorando.
 
-### Descanso automático entre séries
+### Treino guiado, passo a passo
 
-No circuito principal e no finalizador (quando existe), cada bloco mostra "Série X de N" com um botão "Concluir série". Ao tocar nele, o app soma a série, e se ainda faltar alguma, inicia sozinho a contagem de descanso (60s no Força, 20s no HIIT, 60s no Express — o mesmo valor usado no cronograma de cada treino), com aviso sonoro perto do fim. Dá pra pular o descanso a qualquer momento. Quando todas as séries planejadas estão concluídas, o bloco avisa e libera para seguir para o próximo trecho do treino ou finalizar. O timer de intervalo manual (presets 20/40/60s) continua existindo à parte, para quem quiser cronometrar cada exercício individualmente.
+Antes de começar, o card do treino do dia mostra um resumo (treino, duração, semana do ciclo) com duas configurações rápidas: um contador para ajustar o descanso entre séries (-30s a +60s sobre o padrão do treino) e uma opção para "Pular aquecimento hoje". Essas escolhas ficam salvas no aparelho para os próximos treinos.
+
+Ao tocar em "Começar treino", o app deixa de mostrar tudo de uma vez e passa a guiar o treino em etapas — Aquecimento → Circuito → Finalizador (quando existe) → Fim — com uma trilha no topo da tela indicando onde você está. Cada etapa mostra só o que importa naquele momento:
+
+- **Aquecimento:** lista de exercícios para marcar, com um botão "Concluir aquecimento" para avançar.
+- **Circuito / Finalizador:** os exercícios daquele bloco com espaço pra anotar reps/tempo, e "Série X de N" com um botão "Concluir série". Ao concluir, se ainda faltar série, o app inicia sozinho a contagem de descanso (ajustada conforme a configuração acima), com aviso sonoro perto do fim — dá pra pular o descanso a qualquer momento. Quando as séries daquele bloco terminam, o app já avança para a etapa seguinte sozinho.
+- **Fim:** nota de alongamento (quando o treino tem) e o botão para finalizar e registrar o esforço (RPE).
+
+O botão "Som: on/off" no topo da sessão liga/desliga os avisos sonoros dos descansos.
 
 ### Música (player do YouTube Music embutido)
 
