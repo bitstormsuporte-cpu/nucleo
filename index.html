@@ -811,7 +811,7 @@ function renderHoje(){
 
   container.innerHTML = html;
 
-  if(state.activeSession){
+  if(state.activeSession && state.activeSession.iniciado){
     ensureSessionTimer();
     updateSessionTimerDisplay();
     if(state.roundTimers.main.active) ensureRoundTimer('main');
@@ -894,7 +894,7 @@ function renderRestDayCard(schedule){
 }
 
 function getSessionPhase(w, session){
-  if(w.aquecimento && w.aquecimento.length && !session.pularAquecimento && !session.aquecimentoDone) return 'aquecimento';
+  if(!session.iniciado) return 'aquecimento';
   if(session.roundsCompleted < session.voltas) return 'circuito';
   if(w.finalizador && session.finalizadorRoundsCompleted < w.finalizador.series) return 'finalizador';
   return 'fim';
@@ -983,11 +983,13 @@ function renderActiveSession(session, nivel){
   var html = '<div class="card session-card">';
   html += '<div class="session-top"><div><span class="pill pill-' + w.corBadge + '">' + w.badge + '</span><span class="session-title">' + w.nome + '</span></div>' +
     '<button class="link-btn danger" type="button" onclick="cancelSession()">Cancelar</button></div>';
-  html += renderSessionVitalsBar();
+  if(session.iniciado) html += renderSessionVitalsBar();
   if('wakeLock' in navigator){
     html += '<p class="wakelock-hint">A tela fica acesa durante o treino.</p>';
   }
-  html += '<button type="button" class="mute-btn" onclick="toggleSound()" style="display:block;margin:0 auto 16px">' + (state.soundMuted ? 'Som: off' : 'Som: on') + '</button>';
+  if(session.iniciado){
+    html += '<button type="button" class="mute-btn" onclick="toggleSound()" style="display:block;margin:0 auto 16px">' + (state.soundMuted ? 'Som: off' : 'Som: on') + '</button>';
+  }
   html += renderPhaseProgress(w, session, phase);
   if(phase === 'aquecimento'){
     html += renderWarmupChecklist(w, session);
@@ -1006,7 +1008,9 @@ function renderActiveSession(session, nivel){
     }
     html += '<div class="section-block"><p class="empty-hint">Treino concluído! Toque abaixo para registrar o esforço e fechar o treino.</p></div>';
   }
-  html += '<div class="section-block"><button class="btn btn-primary btn-block" type="button" onclick="openFinishSheet()">Finalizar treino</button></div>';
+  if(session.iniciado){
+    html += '<div class="section-block"><button class="btn btn-primary btn-block" type="button" onclick="openFinishSheet()">Finalizar treino</button></div>';
+  }
   html += '</div>';
   return html;
 }
@@ -1025,13 +1029,15 @@ function renderWarmupChecklist(w, session){
     return '<label class="checklist-item"><input type="checkbox" ' + checked + ' onchange="toggleAquecimento(' + i + ', this.checked)"><span>' + a.nome + ' <span class="meta-text">' + a.meta + '</span></span></label>';
   }).join('');
   return '<div class="section-block"><h3 class="section-title">Aquecimento</h3>' + items +
-    '<button type="button" class="btn btn-primary btn-block" style="margin-top:14px" onclick="completeWarmup()">Concluir aquecimento</button></div>';
+    '<p class="preview-desc" style="margin-top:10px">Faça o aquecimento com calma. O cronômetro e as calorias só começam a contar quando você tocar em "Iniciar treino".</p>' +
+    '<button type="button" class="btn btn-primary btn-block" onclick="completeWarmup()">Iniciar treino</button></div>';
 }
 
 function completeWarmup(){
   var s = state.activeSession;
   if(!s) return;
-  s.aquecimentoDone = true;
+  s.iniciado = true;
+  s.startTime = new Date().toISOString();
   setActiveSession(s);
   renderHoje();
 }
@@ -1338,17 +1344,19 @@ function changeVoltas(delta){
 function startSession(workoutId){
   var w = WORKOUTS[workoutId];
   var nivel = state.nivel;
+  var pularAquecimento = !!getProfile().pularAquecimento;
+  var hasAquecimento = w.aquecimento && w.aquecimento.length && !pularAquecimento;
   var session = {
     workoutId: workoutId,
-    startTime: new Date().toISOString(),
+    startTime: hasAquecimento ? null : new Date().toISOString(),
+    iniciado: !hasAquecimento,
     voltas: getVoltasForToday(w, nivel),
     roundsCompleted: 0,
     finalizadorRoundsCompleted: 0,
     exercicioIndex: 0,
     exercicioIndexFinalizador: 0,
     aquecimentoChecked: w.aquecimento.map(function(){ return false; }),
-    aquecimentoDone: false,
-    pularAquecimento: !!getProfile().pularAquecimento,
+    pularAquecimento: pularAquecimento,
     resultados: {},
     resultadosFinalizador: {}
   };
