@@ -166,20 +166,21 @@
   .finalizador-block{ background:var(--accent-tint); border-radius:var(--radius-sm); padding:12px; margin-top:20px; border-top:none; }
   .finalizador-block .exercise-row{ border-bottom-color:rgba(206,255,0,.2); }
 
-  /* Interval timer */
-  .interval-panel{ background:var(--card-alt); border:1px solid var(--border); border-radius:var(--radius); padding:14px; margin-bottom:4px; transition:background-color .3s ease, border-color .3s ease; }
-  .interval-panel.phase-esforco{ background:var(--accent-tint); border-color:rgba(206,255,0,.4); }
-  .interval-panel.phase-descanso{ background:var(--success-tint); border-color:rgba(34,197,94,.4); }
-  .interval-header{ display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+  /* Session sound toggle */
   .mute-btn{ font-size:11px; color:var(--text-secondary); text-transform:uppercase; letter-spacing:.05em; font-family:var(--font-display); }
-  .interval-presets{ display:flex; gap:8px; margin-bottom:12px; }
-  .preset-btn{ flex:1; padding:8px 4px; border:1px solid var(--border); border-radius:var(--radius-sm); font-family:var(--font-mono); font-size:12px; background:var(--card); color:var(--text); }
-  .preset-btn.active{ background:var(--text); color:var(--bg); border-color:var(--text); }
+
+  /* Phase progress (fluxo guiado do treino) */
+  .phase-progress{ display:flex; align-items:center; justify-content:center; flex-wrap:wrap; gap:4px; font-family:var(--font-display); font-size:11px; text-transform:uppercase; letter-spacing:.04em; color:var(--text-tertiary); margin:0 0 18px; }
+  .phase-step.active{ color:var(--accent); }
+  .phase-step.done{ color:var(--text-secondary); }
+  .phase-sep{ color:var(--text-tertiary); }
   .interval-phase-label{ text-align:center; font-family:var(--font-display); font-size:13px; letter-spacing:.1em; color:var(--text-secondary); }
-  .interval-countdown{ text-align:center; font-family:var(--font-mono); font-size:38px; font-weight:600; padding:2px 0 12px; }
-  .interval-rounds{ display:flex; align-items:center; justify-content:center; gap:14px; font-family:var(--font-mono); font-size:13px; margin-bottom:12px; }
-  .interval-controls{ display:flex; gap:10px; }
-  .interval-controls .btn{ flex:1; padding:10px; }
+
+  /* Configurações do treino (descanso, aquecimento) */
+  .settings-block{ background:var(--card-alt); border:1px solid var(--border); padding:12px 14px; margin-bottom:16px; }
+  .settings-row{ display:flex; align-items:center; justify-content:space-between; padding:4px 0; }
+  .settings-label{ font-size:13px; color:var(--text); }
+  .settings-toggle{ padding:8px 0 2px; border-top:1px solid var(--border); margin-top:6px; }
 
   /* Forms */
   .field-label{ display:block; font-size:12px; font-weight:600; color:var(--text-secondary); margin:10px 0 4px; }
@@ -698,14 +699,9 @@ var state = {
   treinosExpanded: null,
   selectedRpe: null,
   sessionTimerHandle: null,
-  intervalTimerHandle: null,
-  intervalTimer: defaultIntervalTimerState(),
+  soundMuted: !!getProfile().somMudo,
   roundTimers: defaultRoundTimersState()
 };
-
-function defaultIntervalTimerState(){
-  return { running: false, phase: 'esforco', remaining: 40, esforco: 40, descanso: 20, roundsDone: 0, roundsTotal: 8, muted: false };
-}
 
 function defaultRoundTimersState(){
   return {
@@ -777,8 +773,6 @@ function renderHoje(){
   if(state.activeSession){
     ensureSessionTimer();
     updateSessionTimerDisplay();
-    if(state.intervalTimer.running) ensureIntervalTimer();
-    updateIntervalTimerDisplay();
     if(state.roundTimers.main.active) ensureRoundTimer('main');
     if(state.roundTimers.finalizador.active) ensureRoundTimer('finalizador');
   } else {
@@ -818,8 +812,36 @@ function renderWorkoutPreviewCard(w, schedule){
     '<p class="preview-meta">' + schedule.nome + ' · ' + w.duracaoText + ' · ' + voltasHoje + ' voltas hoje</p>' +
     '<p class="cycle-label">Semana ' + week + ' de 4 · ' + weekInfo.label + '</p>' +
     '<p class="preview-desc">' + describeFormato(w) + '</p>' +
+    renderWorkoutSettingsBlock(w) +
     '<button class="btn btn-primary btn-block" type="button" onclick="startSession(\'' + w.id + '\')">Começar treino</button>' +
     '</div>';
+}
+
+function renderWorkoutSettingsBlock(w){
+  var profile = getProfile();
+  var restSeconds = getRoundRestSeconds(w);
+  var skipWarmup = !!profile.pularAquecimento;
+  return '<div class="settings-block">' +
+    '<div class="settings-row"><span class="settings-label">Descanso entre séries</span>' +
+    '<div class="stepper"><button type="button" class="stepper-btn" aria-label="Diminuir descanso" onclick="changeRestAdjustment(-10)">−</button>' +
+    '<span class="stepper-value">' + restSeconds + 's</span>' +
+    '<button type="button" class="stepper-btn" aria-label="Aumentar descanso" onclick="changeRestAdjustment(10)">+</button></div></div>' +
+    '<label class="checklist-item settings-toggle"><input type="checkbox" ' + (skipWarmup ? 'checked' : '') + ' onchange="toggleSkipWarmup(this.checked)"><span>Pular aquecimento hoje</span></label>' +
+    '</div>';
+}
+
+function changeRestAdjustment(delta){
+  var p = getProfile();
+  var current = p.descansoAjuste || 0;
+  p.descansoAjuste = Math.max(-30, Math.min(60, current + delta));
+  setProfile(p);
+  renderHoje();
+}
+
+function toggleSkipWarmup(checked){
+  var p = getProfile();
+  p.pularAquecimento = checked;
+  setProfile(p);
 }
 
 function renderRestDayCard(schedule){
@@ -830,30 +852,67 @@ function renderRestDayCard(schedule){
     '</div>';
 }
 
+function getSessionPhase(w, session){
+  if(w.aquecimento && w.aquecimento.length && !session.pularAquecimento && !session.aquecimentoDone) return 'aquecimento';
+  if(session.roundsCompleted < session.voltas) return 'circuito';
+  if(w.finalizador && session.finalizadorRoundsCompleted < w.finalizador.series) return 'finalizador';
+  return 'fim';
+}
+
+function renderPhaseProgress(w, session, phase){
+  var steps = [];
+  if(w.aquecimento && w.aquecimento.length && !session.pularAquecimento) steps.push({ key: 'aquecimento', label: 'Aquecimento' });
+  steps.push({ key: 'circuito', label: w.formato === 'hiit' ? 'Circuito' : 'Exercícios' });
+  if(w.finalizador) steps.push({ key: 'finalizador', label: 'Finalizador' });
+  steps.push({ key: 'fim', label: 'Fim' });
+  var idx = 0;
+  steps.forEach(function(s, i){ if(s.key === phase) idx = i; });
+  return '<p class="phase-progress">' + steps.map(function(s, i){
+    var cls = i === idx ? 'phase-step active' : (i < idx ? 'phase-step done' : 'phase-step');
+    return '<span class="' + cls + '">' + s.label + '</span>';
+  }).join('<span class="phase-sep">›</span>') + '</p>';
+}
+
 function renderActiveSession(session, nivel){
   var w = WORKOUTS[session.workoutId];
+  var phase = getSessionPhase(w, session);
   var html = '<div class="card session-card">';
   html += '<div class="session-top"><div><span class="pill pill-' + w.corBadge + '">' + w.badge + '</span><span class="session-title">' + w.nome + '</span></div>' +
     '<button class="link-btn danger" type="button" onclick="cancelSession()">Cancelar</button></div>';
-  if(w.formato === 'circuito' || w.formato === 'hiit'){
-    var weekInfo = CICLO_SEMANAS[getWeekInCycle()];
-    html += '<p class="cycle-label">Semana ' + getWeekInCycle() + ' de 4 · ' + weekInfo.label + '</p>';
-  }
   html += '<div class="timer-display" id="sessionTimerDisplay">00:00:00</div>';
   if('wakeLock' in navigator){
     html += '<p class="wakelock-hint">A tela fica acesa durante o treino.</p>';
   }
-  html += renderIntervalTimerPanel();
-  html += renderWarmupChecklist(w, session);
-  html += renderMainCircuit(w, session, nivel);
-  if(w.finalizador) html += renderFinalizador(w, session, nivel);
-  if(w.alongamentoFinal){
-    html += '<div class="section-block"><h3 class="section-title">Alongamento final</h3>' +
-      '<p class="preview-desc">' + w.alongamentoFinal + ' de alongamento leve para fechar o treino.</p></div>';
+  html += '<button type="button" class="mute-btn" onclick="toggleSound()" style="display:block;margin:0 auto 16px">' + (state.soundMuted ? 'Som: off' : 'Som: on') + '</button>';
+  html += renderPhaseProgress(w, session, phase);
+  if(phase === 'aquecimento'){
+    html += renderWarmupChecklist(w, session);
+  } else if(phase === 'circuito'){
+    if(w.formato === 'circuito' || w.formato === 'hiit'){
+      var weekInfo = CICLO_SEMANAS[getWeekInCycle()];
+      html += '<p class="cycle-label">Semana ' + getWeekInCycle() + ' de 4 · ' + weekInfo.label + '</p>';
+    }
+    html += renderMainCircuit(w, session, nivel);
+  } else if(phase === 'finalizador'){
+    html += renderFinalizador(w, session, nivel);
+  } else {
+    if(w.alongamentoFinal){
+      html += '<div class="section-block"><h3 class="section-title">Alongamento final</h3>' +
+        '<p class="preview-desc">' + w.alongamentoFinal + ' de alongamento leve para fechar o treino.</p></div>';
+    }
+    html += '<div class="section-block"><p class="empty-hint">Treino concluído! Toque abaixo para registrar o esforço e fechar o treino.</p></div>';
   }
   html += '<div class="section-block"><button class="btn btn-primary btn-block" type="button" onclick="openFinishSheet()">Finalizar treino</button></div>';
   html += '</div>';
   return html;
+}
+
+function toggleSound(){
+  state.soundMuted = !state.soundMuted;
+  var p = getProfile();
+  p.somMudo = state.soundMuted;
+  setProfile(p);
+  renderHoje();
 }
 
 function renderWarmupChecklist(w, session){
@@ -861,7 +920,16 @@ function renderWarmupChecklist(w, session){
     var checked = session.aquecimentoChecked && session.aquecimentoChecked[i] ? 'checked' : '';
     return '<label class="checklist-item"><input type="checkbox" ' + checked + ' onchange="toggleAquecimento(' + i + ', this.checked)"><span>' + a.nome + ' <span class="meta-text">' + a.meta + '</span></span></label>';
   }).join('');
-  return '<div class="section-block"><h3 class="section-title">Aquecimento</h3>' + items + '</div>';
+  return '<div class="section-block"><h3 class="section-title">Aquecimento</h3>' + items +
+    '<button type="button" class="btn btn-primary btn-block" style="margin-top:14px" onclick="completeWarmup()">Concluir aquecimento</button></div>';
+}
+
+function completeWarmup(){
+  var s = state.activeSession;
+  if(!s) return;
+  s.aquecimentoDone = true;
+  setActiveSession(s);
+  renderHoje();
 }
 
 function renderMainCircuit(w, session, nivel){
@@ -894,11 +962,15 @@ function setRoundCompleted(session, kind, val){
   if(kind === 'main') session.roundsCompleted = val;
   else session.finalizadorRoundsCompleted = val;
 }
-function getRoundRestSeconds(w){
+function getBaseRestSeconds(w){
   if(w.formato === 'circuito') return w.descansoEntreExercicios;
   if(w.formato === 'hiit') return w.descansoSegundos;
   if(w.formato === 'express') return w.descansoEntreVoltas;
   return 60;
+}
+function getRoundRestSeconds(w){
+  var adj = getProfile().descansoAjuste || 0;
+  return Math.max(10, getBaseRestSeconds(w) + adj);
 }
 
 function renderRoundProgress(w, session, kind){
@@ -1043,6 +1115,8 @@ function startSession(workoutId){
     roundsCompleted: 0,
     finalizadorRoundsCompleted: 0,
     aquecimentoChecked: w.aquecimento.map(function(){ return false; }),
+    aquecimentoDone: false,
+    pularAquecimento: !!getProfile().pularAquecimento,
     resultados: {},
     resultadosFinalizador: {}
   };
@@ -1056,12 +1130,10 @@ function startSession(workoutId){
 function cancelSession(){
   if(!confirm('Cancelar este treino? O progresso não será salvo.')) return;
   clearSessionTimer();
-  clearIntervalTimerHandle();
   clearAllRoundTimers();
   releaseWakeLock();
   state.activeSession = null;
   setActiveSession(null);
-  state.intervalTimer = defaultIntervalTimerState();
   updateMusicCardVisibility();
   renderHoje();
 }
@@ -1083,127 +1155,9 @@ function updateSessionTimerDisplay(){
   el.textContent = fmtDuration(elapsed);
 }
 
-/* --- Cronômetro de intervalo (HIIT) --- */
-
-function renderIntervalTimerPanel(){
-  var t = state.intervalTimer;
-  var phaseClass = t.running ? (t.phase === 'esforco' ? 'phase-esforco' : 'phase-descanso') : '';
-  var phaseLabel = t.running ? (t.phase === 'esforco' ? 'ESFORÇO' : 'DESCANSO') : 'PRONTO';
-  return '<div class="interval-panel ' + phaseClass + '" id="intervalPanel">' +
-    '<div class="interval-header"><h3 class="section-title" style="margin-bottom:0">Timer de intervalo</h3>' +
-    '<button type="button" class="mute-btn" onclick="toggleMute()">' + (t.muted ? 'Som: off' : 'Som: on') + '</button></div>' +
-    '<div class="interval-presets">' +
-    '<button type="button" class="preset-btn ' + (t.esforco === 20 ? 'active' : '') + '" onclick="setIntervalPreset(20,10)">20s / 10s</button>' +
-    '<button type="button" class="preset-btn ' + (t.esforco === 40 ? 'active' : '') + '" onclick="setIntervalPreset(40,20)">40s / 20s</button>' +
-    '<button type="button" class="preset-btn ' + (t.esforco === 60 ? 'active' : '') + '" onclick="setIntervalPreset(60,30)">60s / 30s</button></div>' +
-    '<p class="interval-phase-label" id="intervalPhaseLabel">' + phaseLabel + '</p>' +
-    '<p class="interval-countdown" id="intervalCountdown">' + pad2(Math.floor(t.remaining / 60)) + ':' + pad2(t.remaining % 60) + '</p>' +
-    '<div class="interval-rounds"><button type="button" class="stepper-btn" aria-label="Menos voltas" onclick="changeIntervalRounds(-1)">−</button>' +
-    '<span><span id="intervalRoundsValue">' + t.roundsDone + '</span>/<span id="intervalRoundsTotal">' + t.roundsTotal + '</span> voltas</span>' +
-    '<button type="button" class="stepper-btn" aria-label="Mais voltas" onclick="changeIntervalRounds(1)">+</button></div>' +
-    '<div class="interval-controls">' +
-    (t.running ? '<button type="button" class="btn btn-secondary" onclick="pauseIntervalTimer()">Pausar</button>' : '<button type="button" class="btn btn-primary" onclick="startIntervalTimer()">Iniciar</button>') +
-    '<button type="button" class="btn btn-secondary" onclick="resetIntervalTimer()">Zerar</button></div></div>';
-}
-
-function setIntervalPreset(esforco, descanso){
-  var t = state.intervalTimer;
-  t.esforco = esforco; t.descanso = descanso;
-  if(!t.running){ t.phase = 'esforco'; t.remaining = esforco; }
-  renderHoje();
-}
-
-function changeIntervalRounds(delta){
-  var t = state.intervalTimer;
-  t.roundsTotal = Math.max(1, Math.min(20, t.roundsTotal + delta));
-  var el = document.getElementById('intervalRoundsTotal');
-  if(el) el.textContent = t.roundsTotal;
-}
-
-function toggleMute(){
-  state.intervalTimer.muted = !state.intervalTimer.muted;
-  renderHoje();
-}
-
-function startIntervalTimer(){
-  var t = state.intervalTimer;
-  if(t.running) return;
-  if(t.remaining <= 0) t.remaining = t.phase === 'esforco' ? t.esforco : t.descanso;
-  t.running = true;
-  ensureIntervalTimer();
-  renderHoje();
-}
-
-function pauseIntervalTimer(){
-  state.intervalTimer.running = false;
-  clearIntervalTimerHandle();
-  renderHoje();
-}
-
-function resetIntervalTimer(){
-  var t = state.intervalTimer;
-  t.running = false;
-  clearIntervalTimerHandle();
-  t.phase = 'esforco';
-  t.remaining = t.esforco;
-  t.roundsDone = 0;
-  renderHoje();
-}
-
-function ensureIntervalTimer(){
-  if(state.intervalTimerHandle) return;
-  state.intervalTimerHandle = setInterval(intervalTimerTick, 1000);
-}
-function clearIntervalTimerHandle(){
-  if(state.intervalTimerHandle){ clearInterval(state.intervalTimerHandle); state.intervalTimerHandle = null; }
-}
-
-function intervalTimerTick(){
-  var t = state.intervalTimer;
-  if(!t.running) return;
-  t.remaining--;
-  if(t.remaining <= 0){
-    if(t.phase === 'esforco'){
-      t.phase = 'descanso';
-      t.remaining = t.descanso;
-      playBeep('phase');
-    } else {
-      t.roundsDone++;
-      if(t.roundsDone >= t.roundsTotal){
-        t.running = false;
-        clearIntervalTimerHandle();
-        playBeep('end');
-        t.phase = 'esforco';
-        t.remaining = t.esforco;
-        renderHoje();
-        return;
-      }
-      t.phase = 'esforco';
-      t.remaining = t.esforco;
-      playBeep('phase');
-    }
-  } else if(t.remaining <= 3){
-    playBeep('tick');
-  }
-  updateIntervalTimerDisplay();
-}
-
-function updateIntervalTimerDisplay(){
-  var t = state.intervalTimer;
-  var panel = document.getElementById('intervalPanel');
-  if(!panel) return;
-  panel.className = 'interval-panel ' + (t.running ? (t.phase === 'esforco' ? 'phase-esforco' : 'phase-descanso') : '');
-  var label = document.getElementById('intervalPhaseLabel');
-  var countdown = document.getElementById('intervalCountdown');
-  var roundsDone = document.getElementById('intervalRoundsValue');
-  if(label) label.textContent = t.running ? (t.phase === 'esforco' ? 'ESFORÇO' : 'DESCANSO') : 'PRONTO';
-  if(countdown) countdown.textContent = pad2(Math.floor(t.remaining / 60)) + ':' + pad2(t.remaining % 60);
-  if(roundsDone) roundsDone.textContent = t.roundsDone;
-}
-
 var audioCtx = null;
 function playBeep(kind){
-  if(state.intervalTimer.muted) return;
+  if(state.soundMuted) return;
   try{
     audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
     var o = audioCtx.createOscillator();
@@ -1305,12 +1259,10 @@ function saveSession(){
   setSessions(sessions);
 
   clearSessionTimer();
-  clearIntervalTimerHandle();
   clearAllRoundTimers();
   releaseWakeLock();
   state.activeSession = null;
   setActiveSession(null);
-  state.intervalTimer = defaultIntervalTimerState();
   updateMusicCardVisibility();
   closeFinishSheet();
   showToast('Treino salvo! Bom trabalho.');
