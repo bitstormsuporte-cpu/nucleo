@@ -1,7 +1,7 @@
 // Service worker do app "Núcleo"
 // Faz cache do app shell para funcionamento 100% offline após o primeiro carregamento.
 
-const CACHE_VERSION = 'nucleo-v14';
+const CACHE_VERSION = 'nucleo-v17';
 const APP_SHELL = [
   './',
   './index.html',
