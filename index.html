@@ -138,7 +138,12 @@
   /* Session */
   .session-top{ display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
   .session-title{ font-family:var(--font-display); text-transform:uppercase; font-size:16px; margin-left:8px; vertical-align:middle; }
-  .timer-display{ font-family:var(--font-mono); font-size:44px; font-weight:600; text-align:center; letter-spacing:.02em; padding:14px 0; }
+  .session-vitals-bar{ position:sticky; top:calc(var(--header-h) + env(safe-area-inset-top)); z-index:5; background:var(--card); display:flex; align-items:center; justify-content:space-between; padding:10px 0 12px; margin-bottom:8px; border-bottom:1px solid var(--border); }
+  .vitals-timer{ font-family:var(--font-mono); font-size:28px; font-weight:600; letter-spacing:.02em; }
+  .vitals-side{ display:flex; align-items:center; gap:8px; }
+  .vitals-chip{ font-family:var(--font-mono); font-size:12px; font-weight:600; color:var(--accent); background:var(--card-alt); border:1px solid var(--border); padding:6px 10px; }
+  .vitals-chip-hr{ color:var(--success); }
+  .vitals-chip-add{ color:var(--text-secondary); }
   .wakelock-hint{ text-align:center; font-size:11px; color:var(--text-secondary); margin:-8px 0 14px; }
   .checklist-item{ display:flex; align-items:center; gap:10px; padding:8px 0; font-size:14px; cursor:pointer; }
   .checklist-item input{ width:18px; height:18px; accent-color:var(--accent); flex-shrink:0; }
@@ -147,6 +152,8 @@
   /* Stepper */
   .stepper{ display:flex; align-items:center; gap:10px; }
   .stepper-btn{ width:30px; height:30px; border:1px solid var(--border-strong); border-radius:0; font-size:18px; display:flex; align-items:center; justify-content:center; }
+  .stepper-btn-xs{ width:22px; height:22px; font-size:13px; }
+  .stepper-inline{ display:inline-flex; gap:4px; margin-left:8px; vertical-align:middle; }
   .stepper-btn:active{ background:var(--text); color:var(--bg); border-color:var(--text); }
   .stepper-value{ font-family:var(--font-mono); font-size:14px; font-weight:600; min-width:64px; text-align:center; }
 
@@ -160,11 +167,8 @@
   .exercise-pr{ font-size:11px; color:var(--accent); font-family:var(--font-mono); margin-top:2px; }
   .video-link{ display:inline-flex; align-items:center; gap:4px; margin-top:4px; font-size:11px; font-weight:600; color:var(--success); text-decoration:none; }
   .video-link:active{ opacity:.7; }
-  .exercise-input-wrap{ display:flex; align-items:center; gap:6px; flex-shrink:0; }
   .exercise-input{ width:58px; padding:8px 6px; text-align:center; border:1px solid var(--border); border-radius:var(--radius-sm); background:var(--card-alt); color:var(--text); font-family:var(--font-mono); font-size:16px; font-weight:600; }
   .exercise-unit{ font-size:11px; color:var(--text-secondary); width:32px; }
-  .finalizador-block{ background:var(--accent-tint); border-radius:var(--radius-sm); padding:12px; margin-top:20px; border-top:none; }
-  .finalizador-block .exercise-row{ border-bottom-color:rgba(206,255,0,.2); }
 
   /* Session sound toggle */
   .mute-btn{ font-size:11px; color:var(--text-secondary); text-transform:uppercase; letter-spacing:.05em; font-family:var(--font-display); }
@@ -174,13 +178,34 @@
   .phase-step.active{ color:var(--accent); }
   .phase-step.done{ color:var(--text-secondary); }
   .phase-sep{ color:var(--text-tertiary); }
-  .interval-phase-label{ text-align:center; font-family:var(--font-display); font-size:13px; letter-spacing:.1em; color:var(--text-secondary); }
 
   /* Configurações do treino (descanso, aquecimento) */
   .settings-block{ background:var(--card-alt); border:1px solid var(--border); padding:12px 14px; margin-bottom:16px; }
   .settings-row{ display:flex; align-items:center; justify-content:space-between; padding:4px 0; }
   .settings-label{ font-size:13px; color:var(--text); }
   .settings-toggle{ padding:8px 0 2px; border-top:1px solid var(--border); margin-top:6px; }
+
+  /* Exercício guiado (um por vez) */
+  .exercise-stepper{ text-align:center; padding:4px 0 2px; }
+  .exercise-progressbar{ height:6px; background:var(--border); overflow:hidden; margin-bottom:16px; }
+  .exercise-progressbar-fill{ height:100%; background:var(--accent); transition:width .3s ease; }
+  .exercise-stepper-count{ font-size:12px; color:var(--text-secondary); font-family:var(--font-mono); margin-bottom:16px; }
+  .exercise-stepper-img{ width:140px; height:140px; border-radius:var(--radius-sm); object-fit:cover; background:var(--card-alt); margin-bottom:14px; }
+  .exercise-stepper-name{ font-size:23px; margin-bottom:4px; }
+  .exercise-stepper-meta{ font-size:13px; color:var(--text-secondary); font-family:var(--font-mono); margin-bottom:8px; }
+  .exercise-stepper-input-row{ display:flex; align-items:center; justify-content:center; gap:8px; margin:16px 0 22px; }
+  .exercise-timer-countdown{ font-family:var(--font-mono); font-size:48px; font-weight:700; color:var(--accent); text-align:center; padding:4px 0 6px; }
+  .exercise-input-lg{ width:100px; font-size:32px; padding:12px 8px; }
+  .exercise-stepper-nav{ display:flex; align-items:center; justify-content:center; gap:14px; }
+  .stepper-nav-btn{ width:44px; height:44px; border-radius:0; border:1px solid var(--border-strong); font-size:22px; display:flex; align-items:center; justify-content:center; color:var(--text-secondary); flex-shrink:0; }
+  .stepper-nav-btn:disabled{ opacity:.3; }
+  .exercise-stepper-done{ min-width:170px; }
+
+  /* Descanso entre séries (tela cheia) */
+  .rest-screen{ text-align:center; padding:24px 0 4px; }
+  .rest-screen-label{ font-family:var(--font-display); letter-spacing:.15em; color:var(--text-secondary); font-size:14px; margin-bottom:6px; }
+  .rest-screen-countdown{ font-family:var(--font-mono); font-size:56px; font-weight:700; color:var(--accent); padding:6px 0 10px; }
+  .rest-screen-sub{ font-size:13px; color:var(--text-secondary); margin-bottom:22px; }
 
   /* Forms */
   .field-label{ display:block; font-size:12px; font-weight:600; color:var(--text-secondary); margin:10px 0 4px; }
@@ -280,14 +305,6 @@
   .notes-input{ width:100%; padding:11px 12px; border:1px solid var(--border); border-radius:var(--radius-sm); background:var(--card-alt); color:var(--text); font-size:16px; resize:vertical; }
   .sheet-actions{ display:flex; gap:10px; margin-top:18px; }
   .sheet-actions .btn{ flex:1; }
-
-  /* Progresso de série (descanso automático entre séries) */
-  .round-progress{ margin-top:16px; padding-top:16px; border-top:1px solid var(--border); }
-  .round-progress-label{ font-size:13px; color:var(--text-secondary); margin-bottom:10px; text-align:center; }
-  .round-progress-label strong{ font-family:var(--font-mono); color:var(--text); font-weight:700; }
-  .round-done-hint{ font-size:13px; color:var(--success); text-align:center; }
-  .round-rest-panel{ background:var(--success-tint); border:1px solid rgba(34,197,94,.4); padding:14px; }
-  .round-rest-countdown{ font-family:var(--font-mono); font-size:34px; font-weight:600; padding:6px 0 12px; text-align:center; }
 
   /* Música */
   .music-header{ display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
@@ -447,6 +464,7 @@ var WORKOUTS = {
     corBadge: 'green',
     duracaoText: '25-30 min',
     formato: 'circuito',
+    met: 6,
     descansoEntreExercicios: 60,
     voltasPorNivel: { iniciante: 3, intermediario: 3, avancado: 4 },
     voltasRangeText: '3-4 voltas',
@@ -473,6 +491,7 @@ var WORKOUTS = {
     corBadge: 'orange',
     duracaoText: '20-25 min',
     formato: 'hiit',
+    met: 9,
     esforcoSegundos: 40,
     descansoSegundos: 20,
     voltasPorNivel: { iniciante: 4, intermediario: 4, avancado: 5 },
@@ -506,6 +525,7 @@ var WORKOUTS = {
     corBadge: 'muted',
     duracaoText: '15 min',
     formato: 'express',
+    met: 7,
     esforcoSegundos: 45,
     descansoEntreVoltas: 60,
     voltasPorNivel: { iniciante: 2, intermediario: 2, avancado: 2 },
@@ -610,6 +630,19 @@ function getMeasurements(){
 }
 function setMeasurements(arr){ localStorage.setItem(KEYS.measurements, JSON.stringify(arr)); }
 
+function getUserWeightKg(){
+  var withWeight = getMeasurements().filter(function(m){ return typeof m.peso === 'number' && !isNaN(m.peso); });
+  if(!withWeight.length) return 70;
+  withWeight.sort(function(a, b){ return a.data.localeCompare(b.data); });
+  return withWeight[withWeight.length - 1].peso;
+}
+
+function estimateCalories(w, elapsedSeconds){
+  var kg = getUserWeightKg();
+  var kcalPerMin = (w.met * 3.5 * kg) / 200;
+  return Math.round(kcalPerMin * (elapsedSeconds / 60));
+}
+
 function getActiveSession(){
   try{ return JSON.parse(localStorage.getItem(KEYS.active)) || null; }
   catch(e){ return null; }
@@ -700,16 +733,24 @@ var state = {
   selectedRpe: null,
   sessionTimerHandle: null,
   soundMuted: !!getProfile().somMudo,
-  roundTimers: defaultRoundTimersState()
+  roundTimers: defaultRoundTimersState(),
+  exerciseTimer: defaultExerciseTimerState()
 };
 
 function defaultRoundTimersState(){
   return {
-    main: { active: false, remaining: 0, total: 0 },
-    finalizador: { active: false, remaining: 0, total: 0 }
+    main: { active: false, remaining: 0, total: 0, awaitingContinue: false },
+    finalizador: { active: false, remaining: 0, total: 0, awaitingContinue: false }
   };
 }
 var roundTimerHandles = { main: null, finalizador: null };
+
+function defaultExerciseTimerState(){
+  return { active: false, remaining: 0, total: 0, key: null };
+}
+var exerciseTimerHandle = null;
+
+var heartRate = { connected: false, bpm: null, device: null };
 
 /* ============================================================
    NAVEGAÇÃO ENTRE ABAS
@@ -873,13 +914,76 @@ function renderPhaseProgress(w, session, phase){
   }).join('<span class="phase-sep">›</span>') + '</p>';
 }
 
+function renderSessionVitalsBar(){
+  var hrChip = heartRate.connected
+    ? '<button type="button" class="vitals-chip vitals-chip-hr" onclick="disconnectHeartRate()"><span id="heartRateValue">' + (heartRate.bpm != null ? heartRate.bpm : '--') + '</span> bpm</button>'
+    : '<button type="button" class="vitals-chip vitals-chip-add" onclick="connectHeartRate()">+ BPM</button>';
+  return '<div class="session-vitals-bar">' +
+    '<div class="vitals-timer" id="sessionTimerDisplay">00:00:00</div>' +
+    '<div class="vitals-side">' +
+    '<span class="vitals-chip"><span id="sessionCaloriesDisplay">0</span> kcal</span>' +
+    hrChip +
+    '</div></div>';
+}
+
+function connectHeartRate(){
+  if(!navigator.bluetooth){
+    alert('Bluetooth não é compatível com este navegador. Funciona no Chrome (Android ou computador) com um monitor cardíaco BLE padrão; no iPhone o Safari não oferece essa função.');
+    return;
+  }
+  navigator.bluetooth.requestDevice({ filters: [{ services: ['heart_rate'] }] })
+    .then(function(device){
+      heartRate.device = device;
+      device.addEventListener('gattserverdisconnected', onHeartRateDisconnected);
+      return device.gatt.connect();
+    })
+    .then(function(server){ return server.getPrimaryService('heart_rate'); })
+    .then(function(service){ return service.getCharacteristic('heart_rate_measurement'); })
+    .then(function(characteristic){
+      characteristic.addEventListener('characteristicvaluechanged', onHeartRateChanged);
+      return characteristic.startNotifications();
+    })
+    .then(function(){
+      heartRate.connected = true;
+      renderHoje();
+    })
+    .catch(function(err){
+      if(err && err.name === 'NotFoundError') return;
+      alert('Não foi possível conectar ao monitor cardíaco. Verifique se ele está ligado e por perto.');
+    });
+}
+
+function onHeartRateChanged(event){
+  var value = event.target.value;
+  var flags = value.getUint8(0);
+  var rate16Bits = flags & 0x1;
+  heartRate.bpm = rate16Bits ? value.getUint16(1, true) : value.getUint8(1);
+  var el = document.getElementById('heartRateValue');
+  if(el) el.textContent = heartRate.bpm;
+}
+
+function onHeartRateDisconnected(){
+  heartRate.connected = false;
+  heartRate.bpm = null;
+  renderHoje();
+}
+
+function disconnectHeartRate(){
+  if(heartRate.device && heartRate.device.gatt && heartRate.device.gatt.connected){
+    heartRate.device.gatt.disconnect();
+  }
+  heartRate.connected = false;
+  heartRate.bpm = null;
+  renderHoje();
+}
+
 function renderActiveSession(session, nivel){
   var w = WORKOUTS[session.workoutId];
   var phase = getSessionPhase(w, session);
   var html = '<div class="card session-card">';
   html += '<div class="session-top"><div><span class="pill pill-' + w.corBadge + '">' + w.badge + '</span><span class="session-title">' + w.nome + '</span></div>' +
     '<button class="link-btn danger" type="button" onclick="cancelSession()">Cancelar</button></div>';
-  html += '<div class="timer-display" id="sessionTimerDisplay">00:00:00</div>';
+  html += renderSessionVitalsBar();
   if('wakeLock' in navigator){
     html += '<p class="wakelock-hint">A tela fica acesa durante o treino.</p>';
   }
@@ -892,9 +996,9 @@ function renderActiveSession(session, nivel){
       var weekInfo = CICLO_SEMANAS[getWeekInCycle()];
       html += '<p class="cycle-label">Semana ' + getWeekInCycle() + ' de 4 · ' + weekInfo.label + '</p>';
     }
-    html += renderMainCircuit(w, session, nivel);
+    html += renderRoundOrExerciseBlock(w, session, 'main', nivel);
   } else if(phase === 'finalizador'){
-    html += renderFinalizador(w, session, nivel);
+    html += renderRoundOrExerciseBlock(w, session, 'finalizador', nivel);
   } else {
     if(w.alongamentoFinal){
       html += '<div class="section-block"><h3 class="section-title">Alongamento final</h3>' +
@@ -932,24 +1036,154 @@ function completeWarmup(){
   renderHoje();
 }
 
-function renderMainCircuit(w, session, nivel){
-  var rows = w.exercicios.map(function(ex){
-    return renderExerciseSessionRow(ex, nivel, session.resultados[ex.id], 'resultados');
-  }).join('');
-  return '<div class="section-block">' +
-    '<div class="section-title-row"><h3 class="section-title">Circuito principal</h3>' +
-    '<div class="stepper"><button type="button" class="stepper-btn" aria-label="Diminuir voltas" onclick="changeVoltas(-1)">−</button>' +
-    '<span class="stepper-value"><span id="voltasValue">' + session.voltas + '</span> voltas</span>' +
-    '<button type="button" class="stepper-btn" aria-label="Aumentar voltas" onclick="changeVoltas(1)">+</button></div></div>' +
-    rows + renderRoundProgress(w, session, 'main') + '</div>';
+function getExerciseIndexKey(kind){
+  return kind === 'main' ? 'exercicioIndex' : 'exercicioIndexFinalizador';
 }
 
-function renderFinalizador(w, session, nivel){
-  var rows = w.finalizador.exercicios.map(function(ex){
-    return renderExerciseSessionRow(ex, nivel, session.resultadosFinalizador[ex.id], 'resultadosFinalizador');
-  }).join('');
-  var titulo = w.finalizador.titulo + (w.finalizador.series > 1 ? ' · ' + w.finalizador.series + ' séries' : '');
-  return '<div class="finalizador-block"><h3 class="section-title">' + titulo + '</h3>' + rows + renderRoundProgress(w, session, 'finalizador') + '</div>';
+function getPhaseExercises(w, kind){
+  return kind === 'main' ? w.exercicios : w.finalizador.exercicios;
+}
+
+function renderRoundOrExerciseBlock(w, session, kind, nivel){
+  var rt = state.roundTimers[kind];
+  if(rt.active){
+    clearExerciseTimerHandle();
+    return renderRestScreen(w, session, kind, rt);
+  }
+  var planned = getRoundTarget(w, session, kind);
+  var completed = getRoundCompleted(session, kind);
+  return renderExerciseStepper(w, session, kind, nivel, completed, planned);
+}
+
+function renderRestScreen(w, session, kind, rt){
+  var exercises = getPhaseExercises(w, kind);
+  var key = getExerciseIndexKey(kind);
+  var nextEx = exercises[Math.min(session[key] || 0, exercises.length - 1)];
+  var completed = getRoundCompleted(session, kind);
+  var planned = getRoundTarget(w, session, kind);
+  var sub = 'A seguir: ' + nextEx.nome + ' · Série ' + (completed + 1) + ' de ' + planned;
+  if(rt.awaitingContinue){
+    return '<div class="rest-screen">' +
+      '<p class="rest-screen-label">DESCANSO CONCLUÍDO</p>' +
+      '<p class="rest-screen-sub">' + sub + '</p>' +
+      '<button type="button" class="btn btn-primary btn-block" onclick="continueAfterRest(\'' + kind + '\')">Avançar</button>' +
+      '</div>';
+  }
+  return '<div class="rest-screen">' +
+    '<p class="rest-screen-label">DESCANSO</p>' +
+    '<p class="rest-screen-countdown" id="roundRestCountdown_' + kind + '">' + pad2(Math.floor(rt.remaining / 60)) + ':' + pad2(rt.remaining % 60) + '</p>' +
+    '<p class="rest-screen-sub">' + sub + '</p>' +
+    '<button type="button" class="btn btn-secondary btn-block" onclick="skipRoundRest(\'' + kind + '\')">Pular descanso</button>' +
+    '</div>';
+}
+
+function renderExerciseStepper(w, session, kind, nivel, completed, planned){
+  var exercises = getPhaseExercises(w, kind);
+  var key = getExerciseIndexKey(kind);
+  var idx = Math.min(session[key] || 0, exercises.length - 1);
+  var ex = exercises[idx];
+  var total = exercises.length;
+  var pct = Math.round((idx / total) * 100);
+  var bucket = kind === 'main' ? 'resultados' : 'resultadosFinalizador';
+  var currentValue = session[bucket][ex.id];
+  var meta = getMetaText(ex, nivel);
+  var pr = getPR(ex.id);
+  var isDuration = ex.unidade === 'segundos';
+  var targetSeconds = isDuration ? (Number(extractNumber(meta)) || 0) : 0;
+  var exKey = kind + ':' + idx;
+  var val = (currentValue === undefined || currentValue === null) ? '' : currentValue;
+  var voltasControl = kind === 'main'
+    ? '<span class="stepper-inline"><button type="button" class="stepper-btn stepper-btn-xs" aria-label="Diminuir voltas" onclick="changeVoltas(-1)">−</button><button type="button" class="stepper-btn stepper-btn-xs" aria-label="Aumentar voltas" onclick="changeVoltas(1)">+</button></span>'
+    : '';
+
+  var progressDisplay;
+  if(isDuration && targetSeconds > 0){
+    ensureExerciseTimerFor(exKey, targetSeconds);
+    var et = state.exerciseTimer;
+    progressDisplay = '<p class="exercise-timer-countdown" id="exerciseTimerCountdown">' + pad2(Math.floor(et.remaining / 60)) + ':' + pad2(et.remaining % 60) + '</p>' +
+      '<div class="exercise-stepper-input-row">' +
+      '<input type="number" inputmode="numeric" min="0" step="1" class="exercise-input exercise-input-lg" value="' + val + '" placeholder="' + (extractNumber(meta) || '0') + '" ' +
+      'oninput="updateResultado(\'' + ex.id + '\',\'' + bucket + '\', this.value)">' +
+      '<span class="exercise-unit">s</span></div>';
+  } else {
+    if(state.exerciseTimer.key !== exKey){
+      clearExerciseTimerHandle();
+      state.exerciseTimer = { active: false, remaining: 0, total: 0, key: exKey };
+    }
+    progressDisplay = '<div class="exercise-stepper-input-row">' +
+      '<input type="number" inputmode="numeric" min="0" step="1" class="exercise-input exercise-input-lg" value="' + val + '" placeholder="' + (extractNumber(meta) || '0') + '" ' +
+      'oninput="updateResultado(\'' + ex.id + '\',\'' + bucket + '\', this.value)">' +
+      '<span class="exercise-unit">' + (isDuration ? 's' : 'reps') + '</span></div>';
+  }
+
+  return '<div class="exercise-stepper">' +
+    '<div class="exercise-progressbar"><div class="exercise-progressbar-fill" style="width:' + pct + '%"></div></div>' +
+    '<p class="exercise-stepper-count">Exercício ' + (idx + 1) + '/' + total + ' · Série ' + (completed + 1) + ' de ' + planned + voltasControl + '</p>' +
+    renderExerciseThumb(ex, 'exercise-stepper-img') +
+    '<h3 class="exercise-stepper-name">' + ex.nome + '</h3>' +
+    '<p class="exercise-stepper-meta">Meta: ' + (meta || '—') + '</p>' +
+    (pr ? '<p class="exercise-pr">PR: ' + pr.valor + (ex.unidade === 'segundos' ? 's' : ' reps') + ' · ' + fmtDateDisplay(pr.data) + '</p>' : '') +
+    renderVideoLink(ex) +
+    progressDisplay +
+    '<div class="exercise-stepper-nav">' +
+    '<button type="button" class="stepper-nav-btn" aria-label="Exercício anterior" onclick="changeExercicioIndex(\'' + kind + '\', -1)" ' + (idx === 0 ? 'disabled' : '') + '>‹</button>' +
+    '<button type="button" class="btn btn-primary exercise-stepper-done" onclick="completeExercicio(\'' + kind + '\')">Avançar</button>' +
+    '<button type="button" class="stepper-nav-btn" aria-label="Próximo exercício" onclick="changeExercicioIndex(\'' + kind + '\', 1)" ' + (idx >= total - 1 ? 'disabled' : '') + '>›</button>' +
+    '</div></div>';
+}
+
+function changeExercicioIndex(kind, delta){
+  var s = state.activeSession;
+  if(!s) return;
+  var w = WORKOUTS[s.workoutId];
+  var exercises = getPhaseExercises(w, kind);
+  var key = getExerciseIndexKey(kind);
+  var idx = Math.min(s[key] || 0, exercises.length - 1);
+  idx = Math.max(0, Math.min(exercises.length - 1, idx + delta));
+  s[key] = idx;
+  setActiveSession(s);
+  renderHoje();
+}
+
+function completeExercicio(kind){
+  var s = state.activeSession;
+  if(!s) return;
+  var w = WORKOUTS[s.workoutId];
+  var exercises = getPhaseExercises(w, kind);
+  var key = getExerciseIndexKey(kind);
+  var idx = Math.min(s[key] || 0, exercises.length - 1);
+  clearExerciseTimerHandle();
+
+  if(idx >= exercises.length - 1){
+    s[key] = 0;
+    var completed = getRoundCompleted(s, kind) + 1;
+    setRoundCompleted(s, kind, completed);
+    setActiveSession(s);
+    var target = getRoundTarget(w, s, kind);
+    if(completed >= target){
+      playBeep('end');
+      renderHoje();
+      return;
+    }
+  } else {
+    s[key] = idx + 1;
+    setActiveSession(s);
+  }
+  startRoundRest(kind);
+}
+
+function startRoundRest(kind){
+  var w = WORKOUTS[state.activeSession.workoutId];
+  var restSec = getRoundRestSeconds(w);
+  state.roundTimers[kind] = { active: true, remaining: restSec, total: restSec, awaitingContinue: false };
+  ensureRoundTimer(kind);
+  renderHoje();
+}
+
+function continueAfterRest(kind){
+  clearRoundTimerHandle(kind);
+  state.roundTimers[kind] = { active: false, remaining: 0, total: 0, awaitingContinue: false };
+  renderHoje();
 }
 
 function getRoundTarget(w, session, kind){
@@ -973,49 +1207,9 @@ function getRoundRestSeconds(w){
   return Math.max(10, getBaseRestSeconds(w) + adj);
 }
 
-function renderRoundProgress(w, session, kind){
-  var planned = getRoundTarget(w, session, kind);
-  var completed = getRoundCompleted(session, kind);
-  var rt = state.roundTimers[kind];
-  var label = kind === 'main' ? 'Série' : 'Série do finalizador';
-  var html = '<div class="round-progress">';
-  html += '<p class="round-progress-label">' + label + ' <strong>' + Math.min(completed + 1, planned) + '</strong> de <strong>' + planned + '</strong></p>';
-  if(completed >= planned){
-    html += '<p class="round-done-hint">Concluído! ' + (kind === 'main' ? 'Ajuste as voltas acima se quiser mais, ou siga em frente.' : 'Pode finalizar o treino quando estiver pronto.') + '</p>';
-  } else if(rt.active){
-    html += '<div class="round-rest-panel">' +
-      '<p class="interval-phase-label">DESCANSO</p>' +
-      '<p class="round-rest-countdown" id="roundRestCountdown_' + kind + '">' + pad2(Math.floor(rt.remaining / 60)) + ':' + pad2(rt.remaining % 60) + '</p>' +
-      '<button type="button" class="btn btn-secondary btn-block" onclick="skipRoundRest(\'' + kind + '\')">Pular descanso</button></div>';
-  } else {
-    html += '<button type="button" class="btn btn-primary btn-block" onclick="completeRound(\'' + kind + '\')">Concluir série ' + (completed + 1) + '</button>';
-  }
-  html += '</div>';
-  return html;
-}
-
-function completeRound(kind){
-  var s = state.activeSession;
-  if(!s) return;
-  var w = WORKOUTS[s.workoutId];
-  var completed = getRoundCompleted(s, kind) + 1;
-  setRoundCompleted(s, kind, completed);
-  setActiveSession(s);
-  var target = getRoundTarget(w, s, kind);
-  if(completed >= target){
-    playBeep('end');
-    renderHoje();
-    return;
-  }
-  var restSec = getRoundRestSeconds(w);
-  state.roundTimers[kind] = { active: true, remaining: restSec, total: restSec };
-  ensureRoundTimer(kind);
-  renderHoje();
-}
-
 function skipRoundRest(kind){
   clearRoundTimerHandle(kind);
-  state.roundTimers[kind] = { active: false, remaining: 0, total: 0 };
+  state.roundTimers[kind] = { active: false, remaining: 0, total: 0, awaitingContinue: false };
   renderHoje();
 }
 
@@ -1034,13 +1228,13 @@ function clearAllRoundTimers(){
 
 function roundTimerTick(kind){
   var rt = state.roundTimers[kind];
-  if(!rt.active) return;
+  if(!rt.active || rt.awaitingContinue) return;
   rt.remaining--;
   if(rt.remaining <= 0){
     clearRoundTimerHandle(kind);
-    rt.active = false;
     rt.remaining = 0;
-    playBeep('phase');
+    rt.awaitingContinue = true;
+    playBeep('end');
     renderHoje();
     return;
   }
@@ -1055,6 +1249,58 @@ function updateRoundTimerDisplay(kind){
   el.textContent = pad2(Math.floor(rt.remaining / 60)) + ':' + pad2(rt.remaining % 60);
 }
 
+function ensureExerciseTimerFor(exKey, targetSeconds){
+  if(state.exerciseTimer.key === exKey) return;
+  clearExerciseTimerHandle();
+  state.exerciseTimer = { active: true, remaining: targetSeconds, total: targetSeconds, key: exKey };
+  exerciseTimerHandle = setInterval(exerciseTimerTick, 1000);
+}
+
+function clearExerciseTimerHandle(){
+  if(exerciseTimerHandle){ clearInterval(exerciseTimerHandle); exerciseTimerHandle = null; }
+}
+
+function exerciseTimerTick(){
+  var et = state.exerciseTimer;
+  if(!et.active) return;
+  et.remaining--;
+  if(et.remaining <= 0){
+    clearExerciseTimerHandle();
+    et.active = false;
+    et.remaining = 0;
+    playBeep('end');
+    autoFillExerciseResult(et);
+    renderHoje();
+    return;
+  }
+  if(et.remaining <= 3) playBeep('tick');
+  updateExerciseTimerDisplay();
+}
+
+function autoFillExerciseResult(et){
+  var s = state.activeSession;
+  if(!s || !et.key) return;
+  var parts = et.key.split(':');
+  var kind = parts[0], idx = Number(parts[1]);
+  var w = WORKOUTS[s.workoutId];
+  var exercises = getPhaseExercises(w, kind);
+  var ex = exercises[idx];
+  if(!ex) return;
+  var bucket = kind === 'main' ? 'resultados' : 'resultadosFinalizador';
+  var current = s[bucket][ex.id];
+  if(current === undefined || current === null || current === ''){
+    s[bucket][ex.id] = et.total;
+    setActiveSession(s);
+  }
+}
+
+function updateExerciseTimerDisplay(){
+  var el = document.getElementById('exerciseTimerCountdown');
+  if(!el) return;
+  var et = state.exerciseTimer;
+  el.textContent = pad2(Math.floor(et.remaining / 60)) + ':' + pad2(et.remaining % 60);
+}
+
 function renderVideoLink(ex){
   if(!ex.video) return '';
   return '<a class="video-link" href="' + ex.video + '" target="_blank" rel="noopener noreferrer">' +
@@ -1062,25 +1308,9 @@ function renderVideoLink(ex){
     'Vídeo</a>';
 }
 
-function renderExerciseThumb(ex){
+function renderExerciseThumb(ex, extraClass){
   if(!ex.imagem) return '';
-  return '<img class="exercise-thumb" src="' + ex.imagem + '" alt="' + ex.nome + '" loading="lazy" onerror="this.remove()">';
-}
-
-function renderExerciseSessionRow(ex, nivel, currentValue, bucket){
-  var meta = getMetaText(ex, nivel);
-  var pr = getPR(ex.id);
-  var unitLabel = ex.unidade === 'segundos' ? 's' : 'reps';
-  var val = (currentValue === undefined || currentValue === null) ? '' : currentValue;
-  var prLine = pr ? '<p class="exercise-pr">PR: ' + pr.valor + (ex.unidade === 'segundos' ? 's' : ' reps') + ' · ' + fmtDateDisplay(pr.data) + '</p>' : '';
-  return '<div class="exercise-row">' +
-    renderExerciseThumb(ex) +
-    '<div class="exercise-info"><p class="exercise-name">' + ex.nome + '</p>' +
-    '<p class="exercise-meta">Meta: ' + (meta || '—') + '</p>' + prLine + renderVideoLink(ex) + '</div>' +
-    '<div class="exercise-input-wrap">' +
-    '<input type="number" inputmode="numeric" min="0" step="1" class="exercise-input" value="' + val + '" placeholder="' + (extractNumber(meta) || '0') + '" ' +
-    'oninput="updateResultado(\'' + ex.id + '\',\'' + bucket + '\', this.value)">' +
-    '<span class="exercise-unit">' + unitLabel + '</span></div></div>';
+  return '<img class="exercise-thumb' + (extraClass ? ' ' + extraClass : '') + '" src="' + ex.imagem + '" alt="' + ex.nome + '" loading="lazy" onerror="this.remove()">';
 }
 
 function updateResultado(exId, bucket, rawValue){
@@ -1114,6 +1344,8 @@ function startSession(workoutId){
     voltas: getVoltasForToday(w, nivel),
     roundsCompleted: 0,
     finalizadorRoundsCompleted: 0,
+    exercicioIndex: 0,
+    exercicioIndexFinalizador: 0,
     aquecimentoChecked: w.aquecimento.map(function(){ return false; }),
     aquecimentoDone: false,
     pularAquecimento: !!getProfile().pularAquecimento,
@@ -1131,6 +1363,8 @@ function cancelSession(){
   if(!confirm('Cancelar este treino? O progresso não será salvo.')) return;
   clearSessionTimer();
   clearAllRoundTimers();
+  clearExerciseTimerHandle();
+  state.exerciseTimer = defaultExerciseTimerState();
   releaseWakeLock();
   state.activeSession = null;
   setActiveSession(null);
@@ -1153,6 +1387,11 @@ function updateSessionTimerDisplay(){
   var start = new Date(state.activeSession.startTime).getTime();
   var elapsed = Math.max(0, Math.floor((Date.now() - start) / 1000));
   el.textContent = fmtDuration(elapsed);
+  var calEl = document.getElementById('sessionCaloriesDisplay');
+  if(calEl){
+    var w = WORKOUTS[state.activeSession.workoutId];
+    calEl.textContent = estimateCalories(w, elapsed);
+  }
 }
 
 var audioCtx = null;
@@ -1248,6 +1487,7 @@ function saveSession(){
     tipo: s.workoutId,
     nivel: nivel,
     duracaoSegundos: duracaoSegundos,
+    calorias: estimateCalories(w, duracaoSegundos),
     voltas: s.voltas,
     rpe: state.selectedRpe,
     notas: notas,
@@ -1260,6 +1500,8 @@ function saveSession(){
 
   clearSessionTimer();
   clearAllRoundTimers();
+  clearExerciseTimerHandle();
+  state.exerciseTimer = defaultExerciseTimerState();
   releaseWakeLock();
   state.activeSession = null;
   setActiveSession(null);
@@ -1445,11 +1687,12 @@ function buildMonthlyReport(year, month){
   }).sort(function(a, b){ return a.data.localeCompare(b.data); });
 
   var porTipo = {};
-  var duracaoTotal = 0, rpeSum = 0;
+  var duracaoTotal = 0, rpeSum = 0, caloriasTotal = 0;
   sessions.forEach(function(s){
     porTipo[s.tipo] = (porTipo[s.tipo] || 0) + 1;
     duracaoTotal += s.duracaoSegundos || 0;
     rpeSum += s.rpe || 0;
+    caloriasTotal += s.calorias || 0;
   });
 
   var linhas = [];
@@ -1460,6 +1703,7 @@ function buildMonthlyReport(year, month){
   } else {
     linhas.push('Treinos concluídos: ' + sessions.length + ' (Força: ' + (porTipo.forca || 0) + ', HIIT: ' + (porTipo.hiit || 0) + ', Express: ' + (porTipo.express || 0) + ')');
     linhas.push('Tempo total treinado: ' + fmtHoursMinutes(duracaoTotal));
+    linhas.push('Calorias estimadas: ' + Math.round(caloriasTotal) + ' kcal');
     linhas.push('RPE médio: ' + (rpeSum / sessions.length).toFixed(1) + ' / 5');
   }
   linhas.push('Sequência atual: ' + computeStreak(getSessions(), new Date()) + ' dias');
@@ -1833,7 +2077,7 @@ function renderHistoricoBody(s){
     return '<tr><td>' + r.nome + '</td><td>' + (r.meta || '-') + '</td><td>' + valor + '</td></tr>';
   }).join('');
   return '<div class="historico-body">' +
-    '<p class="historico-info">Voltas: ' + (s.voltas != null ? s.voltas : '-') + ' · Nível: ' + levelLabel(s.nivel) + '</p>' +
+    '<p class="historico-info">Voltas: ' + (s.voltas != null ? s.voltas : '-') + ' · Nível: ' + levelLabel(s.nivel) + ' · Calorias: ' + (s.calorias != null ? s.calorias + ' kcal' : '-') + '</p>' +
     '<div class="table-wrap"><table class="data-table"><thead><tr><th>Exercício</th><th>Meta</th><th>Resultado</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
     (s.notas ? '<p class="historico-notas">"' + escapeHtml(s.notas) + '"</p>' : '') +
     '<button class="btn btn-secondary btn-sm danger" type="button" onclick="deleteSession(\'' + s.id + '\')">Excluir registro</button></div>';
