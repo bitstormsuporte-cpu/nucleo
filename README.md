@@ -1,4 +1,4 @@
-[Uploading README.md…]()
+[README.md](https://github.com/user-attachments/files/31400411/README.md)
 # Núcleo
 
 App de treino em casa (calistenia + cardio, sem equipamento) para acompanhar seus treinos diários no celular. Funciona como **PWA** (Progressive Web App): instalável na tela inicial e funcional **offline** depois do primeiro carregamento.
@@ -91,7 +91,9 @@ Se 2 dos últimos 3 treinos registrados vierem com RPE 4 ou 5, a aba Hoje mostra
 
 Antes de começar, o card do treino do dia mostra um resumo (treino, duração, semana do ciclo) com duas configurações rápidas: um contador para ajustar o descanso entre exercícios (-30s a +60s sobre o padrão do treino) e uma opção para "Pular aquecimento hoje". Essas escolhas ficam salvas no aparelho para os próximos treinos.
 
-Ao tocar em "Começar treino", o app guia o treino em etapas — Aquecimento → Circuito → Finalizador (quando existe) → Fim — com uma trilha no topo indicando onde você está. No topo da sessão fica uma barra fixa com o **cronômetro do treino** (canto esquerdo) e, do lado direito, as **calorias estimadas** e o **monitor cardíaco** — essa barra acompanha a rolagem da tela e fica visível do início ao fim do treino, junto com o player de música (card separado, sempre visível enquanto o treino está ativo).
+Ao tocar em "Começar treino", o app mostra primeiro a tela de **Aquecimento** — ainda sem cronômetro rodando, sem calorias, é só a lista de exercícios de aquecimento com um botão "Iniciar treino". Só quando você toca nesse botão é que o treino de verdade começa: o cronômetro zera e passa a contar, as calorias começam a somar, e o app entra no Circuito. Se você marcou "Pular aquecimento hoje" nas configurações do card do dia, essa etapa nem aparece — o treino já começa direto no Circuito.
+
+Depois de iniciado, o app guia o treino em etapas — Circuito → Finalizador (quando existe) → Fim — com uma trilha no topo indicando onde você está. No topo da sessão fica uma barra fixa com o **cronômetro do treino** (canto esquerdo) e, do lado direito, as **calorias estimadas** e o **monitor cardíaco** — essa barra acompanha a rolagem da tela e fica visível até finalizar o treino, junto com o player de música (card separado, sempre visível enquanto o treino está ativo).
 
 Dentro do Circuito e do Finalizador, a tela mostra **um exercício de cada vez**: foto do exercício, nome, meta, barra de progresso, contador "Exercício X/Y · Série A de B" e o link para o vídeo explicando o movimento.
 
