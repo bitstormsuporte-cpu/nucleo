@@ -1,4 +1,4 @@
-[README.md](https://github.com/user-attachments/files/31397859/README.md)
+[Uploading README.md…]()
 # Núcleo
 
 App de treino em casa (calistenia + cardio, sem equipamento) para acompanhar seus treinos diários no celular. Funciona como **PWA** (Progressive Web App): instalável na tela inicial e funcional **offline** depois do primeiro carregamento.
@@ -87,17 +87,35 @@ O app decide sozinho o volume do treino do dia, seguindo um ciclo de 4 semanas q
 
 Se 2 dos últimos 3 treinos registrados vierem com RPE 4 ou 5, a aba Hoje mostra um aviso de fadiga acumulada com um botão pra baixar de nível na hora (ex: Avançado → Intermediário). Na aba Progresso, o card "Resistência (esforço percebido)" mostra um gráfico do RPE de cada treino ao longo do tempo, com uma leitura simples de tendência (caindo, estável ou subindo) comparando os treinos mais recentes com os anteriores — RPE caindo pra um volume parecido de treino é um bom sinal de que o condicionamento está melhorando.
 
-### Treino guiado, passo a passo
+### Treino guiado, um exercício por vez
 
-Antes de começar, o card do treino do dia mostra um resumo (treino, duração, semana do ciclo) com duas configurações rápidas: um contador para ajustar o descanso entre séries (-30s a +60s sobre o padrão do treino) e uma opção para "Pular aquecimento hoje". Essas escolhas ficam salvas no aparelho para os próximos treinos.
+Antes de começar, o card do treino do dia mostra um resumo (treino, duração, semana do ciclo) com duas configurações rápidas: um contador para ajustar o descanso entre exercícios (-30s a +60s sobre o padrão do treino) e uma opção para "Pular aquecimento hoje". Essas escolhas ficam salvas no aparelho para os próximos treinos.
 
-Ao tocar em "Começar treino", o app deixa de mostrar tudo de uma vez e passa a guiar o treino em etapas — Aquecimento → Circuito → Finalizador (quando existe) → Fim — com uma trilha no topo da tela indicando onde você está. Cada etapa mostra só o que importa naquele momento:
+Ao tocar em "Começar treino", o app guia o treino em etapas — Aquecimento → Circuito → Finalizador (quando existe) → Fim — com uma trilha no topo indicando onde você está. No topo da sessão fica uma barra fixa com o **cronômetro do treino** (canto esquerdo) e, do lado direito, as **calorias estimadas** e o **monitor cardíaco** — essa barra acompanha a rolagem da tela e fica visível do início ao fim do treino, junto com o player de música (card separado, sempre visível enquanto o treino está ativo).
+
+Dentro do Circuito e do Finalizador, a tela mostra **um exercício de cada vez**: foto do exercício, nome, meta, barra de progresso, contador "Exercício X/Y · Série A de B" e o link para o vídeo explicando o movimento.
+
+- **Exercícios por tempo** (ex: prancha) mostram um cronômetro regressivo grande contando a duração da meta automaticamente; ao chegar a zero, toca um aviso sonoro e preenche o resultado sozinho (pode editar se aguentou mais ou menos tempo).
+- **Exercícios por repetição** mostram a quantidade-alvo e um campo para anotar quantas você fez.
+
+O botão **"Avançar"**, na parte de baixo da tela, é o mesmo para os dois casos. Ao tocar nele, o app **sempre** entra numa tela de descanso cronometrada (ajustada pela configuração acima), com aviso sonoro perto do fim. Quando o tempo de descanso acaba, o app **não pula sozinho** para o próximo exercício — ele mostra "Descanso concluído" e espera você tocar em "Avançar" para continuar (dá pra pular o descanso a qualquer momento tocando "Pular descanso"). Ao terminar a última série de um bloco, o app avança para a etapa seguinte automaticamente.
 
 - **Aquecimento:** lista de exercícios para marcar, com um botão "Concluir aquecimento" para avançar.
-- **Circuito / Finalizador:** os exercícios daquele bloco com espaço pra anotar reps/tempo, e "Série X de N" com um botão "Concluir série". Ao concluir, se ainda faltar série, o app inicia sozinho a contagem de descanso (ajustada conforme a configuração acima), com aviso sonoro perto do fim — dá pra pular o descanso a qualquer momento. Quando as séries daquele bloco terminam, o app já avança para a etapa seguinte sozinho.
 - **Fim:** nota de alongamento (quando o treino tem) e o botão para finalizar e registrar o esforço (RPE).
 
 O botão "Som: on/off" no topo da sessão liga/desliga os avisos sonoros dos descansos.
+
+### Calorias estimadas
+
+Durante o treino, a barra superior mostra "kcal" e vai subindo em tempo real. A conta usa a fórmula padrão de MET (kcal/min = MET × 3.5 × peso em kg ÷ 200), com um valor de MET aproximado por tipo de treino (Força: 6, HIIT: 9, Express: 7) e o peso mais recente registrado na aba Progresso (ou 70kg como padrão, se nenhum peso foi registrado ainda). É uma estimativa — não substitui um monitor cardíaco. O total da sessão fica salvo no histórico de cada treino e também entra somado no relatório mensal.
+
+### Monitor cardíaco via Bluetooth
+
+Tocando em "+ BPM" na barra superior durante o treino, o app tenta conectar a um monitor cardíaco Bluetooth de verdade (usando o padrão Bluetooth Low Energy "Heart Rate Service", o mesmo que cintas cardíacas como Polar/Wahoo/Garmin usam) e mostra o BPM ao vivo. Toque de novo no chip pra desconectar.
+
+**Limitações importantes:**
+- Só funciona no **Chrome (Android ou computador)** — o Safari do iPhone não implementa a API Web Bluetooth, então no iPhone esse botão vai avisar que não é compatível. Isso é uma restrição da Apple, não tem como contornar num PWA.
+- Funciona com dispositivos que expõem o serviço Bluetooth padrão de frequência cardíaca (cintas cardíacas dedicadas, a maioria dos relógios esportivos). **Não funciona com a Mi Band** — ela usa um protocolo proprietário da Xiaomi/Zepp que exige o app oficial deles, não é acessível por esse Bluetooth genérico do navegador.
 
 ### Música (player do YouTube Music embutido)
 
